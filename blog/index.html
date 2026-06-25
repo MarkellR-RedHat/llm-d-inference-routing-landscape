@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Inference Routing Landscape: How to Choose</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 145'%3E%3Cg fill='%23ee0000'%3E%3Cpath d='M127.47 83.49c12.51 0 30.61-2.58 30.61-17.46a14 14 0 0 0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89 8.69 103.76.5 97.51.5 91.69.5 90 8 83.06 8c-6.68 0-11.64-5.6-17.89-5.6-6 0-9.91 4.09-12.93 12.5 0 0-8.41 23.72-9.49 27.16A6.43 6.43 0 0 0 42.53 44c0 9.22 36.3 39.45 84.94 39.45M160 72.07c1.73 8.19 1.73 9.05 1.73 10.13 0 14-15.74 21.77-36.43 21.77C78.54 104 37.58 76.6 37.58 58.49a18.45 18.45 0 0 1 1.51-7.33C22.27 52 .5 55 .5 74.22c0 31.48 74.59 70.28 133.65 70.28 45.28 0 56.7-20.48 56.7-36.65 0-12.72-11-27.16-30.83-35.78'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&family=Red+Hat+Text:wght@400;500;700&family=Red+Hat+Mono:wght@400;500&display=swap');
+  :root { --rh-red: #EE0000; --rh-red-dark: #CC0000; --rh-black: #151515; --rh-gray-dark: #3C3F42; --rh-gray-mid: #6A6E73; --rh-gray-light: #F5F5F5; --rh-blue: #0066CC; --code-bg: #1E1E2E; --code-text: #CDD6F4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Red Hat Text', sans-serif; color: var(--rh-black); line-height: 1.7; font-size: 15px; background: #F9F9F9; }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
+  .submission-header { background: linear-gradient(135deg, var(--rh-red-dark), var(--rh-red)); color: white; padding: 32px 40px; border-radius: 12px 12px 0 0; }
+  .submission-header h1 { font-family: 'Red Hat Display', sans-serif; font-weight: 900; font-size: 1.6em; margin-bottom: 4px; }
+  .submission-header .subtitle { opacity: 0.85; font-size: 0.95em; }
+  .meta-card { background: white; border: 1px solid #E0E0E0; border-top: none; border-radius: 0 0 12px 12px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .meta-row { display: flex; border-bottom: 1px solid #EFEFEF; }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-label { flex: 0 0 220px; padding: 16px 20px; background: #FAFAFA; font-weight: 700; font-size: 0.88em; color: var(--rh-gray-dark); border-right: 1px solid #EFEFEF; }
+  .meta-value { flex: 1; padding: 16px 20px; }
+  .meta-value a { color: var(--rh-blue); text-decoration: none; }
+  .badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.82em; font-weight: 600; margin-right: 6px; }
+  .badge-green { background: #E6F9E6; color: #1A7A1A; }
+  .badge-blue { background: #E6F0FF; color: #004080; }
+  .badge-red { background: #FFE6E6; color: #CC0000; }
+  .article { background: white; border: 1px solid #E0E0E0; border-radius: 12px; padding: 48px 40px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .article h2 { font-family: 'Red Hat Display', sans-serif; font-weight: 800; font-size: 1.4em; color: var(--rh-black); margin: 2em 0 0.6em; padding-bottom: 8px; border-bottom: 3px solid var(--rh-red); }
+  .article h2:first-child { margin-top: 0; }
+  .article h3 { font-family: 'Red Hat Display', sans-serif; font-weight: 700; font-size: 1.1em; margin: 1.5em 0 0.5em; }
+  .article p { margin: 0 0 1.2em; }
+  .article ul, .article ol { margin: 0 0 1.2em 1.5em; }
+  .article li { margin-bottom: 0.4em; }
+  .article strong { color: var(--rh-black); }
+  .article code { font-family: 'Red Hat Mono', monospace; background: #F0F0F0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .article pre { background: var(--code-bg); color: var(--code-text); padding: 20px; border-radius: 8px; overflow-x: auto; margin: 1.2em 0; font-family: 'Red Hat Mono', monospace; font-size: 0.85em; line-height: 1.6; }
+  .article pre code { background: none; padding: 0; color: inherit; }
+  .callout { background: #FFF8E1; border-left: 4px solid #FFC107; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 1.5em 0; font-size: 0.92em; }
+  .callout-red { background: #FFF0F0; border-left-color: var(--rh-red); }
+  .stat-box { display: inline-block; background: #F0F4FF; border: 1px solid #D0DCFF; border-radius: 8px; padding: 12px 20px; margin: 4px; text-align: center; }
+  .stat-box .number { font-family: 'Red Hat Display', sans-serif; font-size: 1.8em; font-weight: 900; color: var(--rh-red); }
+  .stat-box .label { font-size: 0.78em; color: var(--rh-gray-mid); margin-top: 2px; }
+  .footer-note { text-align: center; color: var(--rh-gray-mid); font-size: 0.85em; padding: 16px 0 8px; }
+  .hub-link { text-align: center; padding: 24px 0; }
+  .hub-link a { font-family: 'Red Hat Display', sans-serif; font-size: 0.85rem; font-weight: 600; text-decoration: none; margin: 0 12px; }
+  @media (max-width: 700px) { .meta-row { flex-direction: column; } .meta-label { flex: none; border-right: none; border-bottom: 1px solid #EFEFEF; } .article { padding: 28px 20px; } .submission-header { padding: 24px 20px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="submission-header">
+  <h1>The Inference Routing Landscape: How to Choose</h1>
+  <div class="subtitle">Round-robin, load-aware, hash-based, or cache-aware — which routing approach fits your workload</div>
+</div>
+
+<div class="meta-card">
+  <div class="meta-row"><div class="meta-label">Author</div><div class="meta-value">Markell Rawls, Developer Advocate, Red Hat</div></div>
+  <div class="meta-row"><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-blue">Draft</span></div></div>
+  <div class="meta-row"><div class="meta-label">Word Count</div><div class="meta-value">~1,200</div></div>
+  <div class="meta-row"><div class="meta-label">Tags</div><div class="meta-value"><span class="badge badge-red">llm-d</span><span class="badge badge-blue">Architecture</span><span class="badge badge-blue">Routing</span><span class="badge badge-blue">Strategy</span></div></div>
+  <div class="meta-row"><div class="meta-label">Companion</div><div class="meta-value"><a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/">Interactive Routing Landscape Comparison</a></div></div>
+</div>
+
+<div class="article">
+<h2>The Routing Decision Nobody Talks About</h2>
+
+<p>Every enterprise deploying LLMs makes a routing decision &mdash; whether they realize it or not. A basic load balancer in front of vLLM replicas is a routing decision. A managed API gateway is a routing decision. Each one carries trade-offs in cost, latency, vendor lock-in, and operational flexibility that compound at scale.</p>
+
+<p>This post maps the inference routing landscape: what approaches exist, where each one wins, and how to choose based on your workload.</p>
+
+<h2>The Routing Approaches</h2>
+
+<h3>Round-robin / random</h3>
+<p>The default. Requests are distributed evenly across replicas with no awareness of what each replica has cached or how busy it is.</p>
+<ul>
+  <li><strong>Strengths:</strong> Zero configuration, works everywhere, no single point of failure</li>
+  <li><strong>Weaknesses:</strong> Ignores KV cache state entirely. Every request is a cold prefill. GPU waste scales linearly with traffic.</li>
+  <li><strong>Best for:</strong> Single-model deployments with uniform, short prompts</li>
+</ul>
+
+<h3>Load-aware routing</h3>
+<p>Routes to the least-busy replica based on queue depth, GPU utilization, or pending request count.</p>
+<ul>
+  <li><strong>Strengths:</strong> Prevents hotspots, simple to implement</li>
+  <li><strong>Weaknesses:</strong> Still ignores cache state. A lightly-loaded pod with no cached prefix is worse than a busy pod with a warm cache.</li>
+  <li><strong>Best for:</strong> Heterogeneous hardware where some replicas are faster than others</li>
+</ul>
+
+<h3>Hash-based routing</h3>
+<p>Hashes the prompt (or a prefix of it) and consistently maps it to the same replica.</p>
+<ul>
+  <li><strong>Strengths:</strong> Deterministic cache affinity, no state tracking needed</li>
+  <li><strong>Weaknesses:</strong> Rigid. Doesn&rsquo;t handle variable-length prefixes, pod scaling, or cache eviction. Skewed hash distributions create hotspots.</li>
+  <li><strong>Best for:</strong> Static workloads with predictable prompt patterns</li>
+</ul>
+
+<h3>Prefix-cache-aware routing (llm-d)</h3>
+<p>Tracks actual KV cache state across all replicas in real time. Routes each request to the pod with the longest matching cached prefix, balanced against load.</p>
+<ul>
+  <li><strong>Strengths:</strong> Maximizes cache hits, adapts to dynamic workloads, handles variable prefix lengths, scales with pod count</li>
+  <li><strong>Weaknesses:</strong> Requires EPP sidecar, adds a routing hop, more complex to deploy</li>
+  <li><strong>Best for:</strong> Multi-turn conversations, agentic workflows, document Q&amp;A, any workload with prefix sharing</li>
+</ul>
+
+<h2>The Scoring Framework</h2>
+
+<p>When evaluating routing approaches for enterprise deployment, we score across five dimensions:</p>
+
+<div style="margin:1.5em 0;">
+  <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Cost</div><div class="label">GPU utilization &amp; waste</div></div>
+  <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Latency</div><div class="label">TTFT &amp; throughput</div></div>
+  <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Lock-in</div><div class="label">Vendor dependency</div></div>
+  <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Flexibility</div><div class="label">Hardware &amp; model support</div></div>
+  <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Ecosystem</div><div class="label">Community &amp; partners</div></div>
+</div>
+
+<h3>Vendor lock-in: the hidden cost</h3>
+<p>Proprietary inference platforms often bundle routing with their serving stack. You get convenience today, but when you need to switch hardware vendors, change models, or move to a different cloud, you&rsquo;re rebuilding the routing layer from scratch.</p>
+
+<p>llm-d runs on any Kubernetes cluster, any GPU vendor (NVIDIA, AMD, Intel), and any vLLM-supported model. The routing logic is decoupled from the infrastructure.</p>
+
+<h3>Hardware flexibility</h3>
+<p>As GPU generations evolve and new accelerators emerge (NVIDIA B200, AMD MI325X, Intel Gaudi 3), your routing layer shouldn&rsquo;t be tied to one vendor&rsquo;s SDK. llm-d uses standard Kubernetes primitives &mdash; pods, services, endpoints &mdash; that work across any hardware.</p>
+
+<h2>The Business View</h2>
+
+<p>For decision-makers who need the summary:</p>
+
+<div class="callout callout-red">
+  <strong>The question isn&rsquo;t &ldquo;which routing is fastest?&rdquo;</strong> It&rsquo;s &ldquo;which routing approach lets us scale without locking us in, works across GPU vendors, and has a community behind it?&rdquo; Speed is table stakes &mdash; llm-d delivers 47.5x TTFT improvement. The strategic advantage is what comes with it.
+</div>
+
+<h2>How to Choose</h2>
+
+<p>Use this decision tree:</p>
+
+<ol>
+  <li><strong>Are your prompts short and uniform?</strong> Round-robin is fine. Don&rsquo;t over-engineer.</li>
+  <li><strong>Do you have prefix sharing?</strong> (Multi-turn, agents, document Q&amp;A) &rarr; You need cache-aware routing.</li>
+  <li><strong>Are you on multiple GPU vendors?</strong> &rarr; Avoid vendor-specific routing. Use Kubernetes-native.</li>
+  <li><strong>Do you need multi-tenant isolation?</strong> &rarr; llm-d supports per-namespace routing policies on OpenShift.</li>
+</ol>
+
+<h2>Try the Interactive Comparison</h2>
+
+<p>The <a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/">Inference Routing Landscape</a> web app lets you compare approaches side by side, toggle between a technical and business view, and see how each scores across the five dimensions for your specific workload.</p>
+
+<ul>
+  <li><strong>llm-d on GitHub:</strong> <a href="https://github.com/llm-d/llm-d">github.com/llm-d/llm-d</a></li>
+  <li><strong>Community:</strong> <a href="https://cloud-native.slack.com/archives/llm-d">#llm-d on CNCF Slack</a></li>
+</ul>
+</div>
+
+<div class="footer-note">Submitted by Markell Rawls &middot; Developer Advocate &middot; Red Hat</div>
+
+<div class="hub-link">
+  <a href="https://markellr-redhat.github.io/llm-d-content-hub/" style="color:#CC0000;">&larr; Back to llm-d Content Hub</a>
+  <a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/" style="color:#0066CC;">Open Interactive App &rarr;</a>
+</div>
+
+</div>
+</body>
+</html>
