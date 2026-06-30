@@ -1,16 +1,16 @@
 (function () {
   'use strict';
 
-  /* ══════════════════════════════════════════════════════════
-     CONFIG  --  All data inlined
-     ══════════════════════════════════════════════════════════ */
+  /* ======================================================================
+     CONFIG -- All data inlined
+     ====================================================================== */
   var CONFIG = {
     STACKS: [
       {
         key: 'basic',
         name: 'Basic Stack',
-        tagline: 'Runtime behind a round-robin load balancer. Each pod has local prefix caching, but routing is random  --  most requests miss the warm cache.',
-        color: '#e53e3e',
+        tagline: 'Runtime behind a round-robin load balancer. Each pod has local prefix caching, but routing is random -- most requests miss the warm cache.',
+        color: '#C4573A',
         cssClass: 'basic',
         layers: [
           { name: 'vLLM or SGLang', type: 'runtime' },
@@ -21,8 +21,8 @@
       {
         key: 'platform',
         name: 'Platform Stack',
-        tagline: 'Adds KServe and Gateway API for Kubernetes-native deployment, autoscaling, and traffic management. Routing is still load-balanced  --  no cache awareness.',
-        color: '#2b6cb0',
+        tagline: 'Adds KServe and Gateway API for Kubernetes-native deployment, autoscaling, and traffic management. Routing is still load-balanced -- no cache awareness.',
+        color: '#4A7FB5',
         cssClass: 'platform',
         layers: [
           { name: 'vLLM or SGLang', type: 'runtime' },
@@ -34,8 +34,8 @@
       {
         key: 'cacheaware',
         name: 'Cache-Aware Stack',
-        tagline: 'Everything in the Platform stack, plus llm-d\'s Endpoint Picker Policy (EPP). Routes requests to pods with warm KV caches  --  up to 47.5x faster TTFT.',
-        color: '#38a169',
+        tagline: 'Everything in the Platform stack, plus llm-d\'s Endpoint Picker Policy (EPP). Routes requests to pods with warm KV caches -- up to 47.5x faster TTFT.',
+        color: '#2E7D52',
         cssClass: 'cacheaware',
         layers: [
           { name: 'vLLM or SGLang', type: 'runtime' },
@@ -52,7 +52,7 @@
         key: 'vllm',
         name: 'vLLM',
         cssClass: 'vllm',
-        color: '#c05621',
+        color: '#B5793A',
         description: 'High-throughput inference engine with PagedAttention and continuous batching. The most widely adopted open-source LLM runtime.',
         strengths: ['PagedAttention', 'Continuous Batching', 'Wide Model Support', 'Large Community']
       },
@@ -60,7 +60,7 @@
         key: 'sglang',
         name: 'SGLang',
         cssClass: 'sglang',
-        color: '#6b46c1',
+        color: '#7B5EA7',
         description: 'Structured generation runtime with RadixAttention for efficient prefix caching and optimized constrained decoding.',
         strengths: ['RadixAttention', 'Structured Output', 'Constrained Decoding', 'Fast Local Cache']
       }
@@ -305,17 +305,17 @@
       {
         key: 'chat',
         label: 'Multi-Turn Chat',
-        icon: '💬',
+        icon: '',
         title: 'Multi-Turn Conversations',
         description: 'Shared system prompts and growing conversation history create high prefix overlap across requests.',
         ratings: { basic: 20, platform: 30, cacheaware: 95 },
         best: 'cacheaware',
-        why: 'Multi-turn chat has extremely high prefix overlap  --  every message reuses the system prompt and prior conversation. With round-robin routing (Basic & Platform stacks), follow-up messages land on random pods, missing the cache almost every time. <strong>The Cache-Aware stack</strong> routes each follow-up to the pod that already has that conversation\'s KV cache warm.'
+        why: 'Multi-turn chat has extremely high prefix overlap -- every message reuses the system prompt and prior conversation. With round-robin routing (Basic & Platform stacks), follow-up messages land on random pods, missing the cache almost every time. <strong>The Cache-Aware stack</strong> routes each follow-up to the pod that already has that conversation\'s KV cache warm.'
       },
       {
         key: 'agentic',
         label: 'Agentic / Tool Use',
-        icon: '🤖',
+        icon: '',
         title: 'Agentic Workflows',
         description: 'Tool-calling agents with iterative reasoning loops. Each call shares the agent context from prior iterations.',
         ratings: { basic: 15, platform: 25, cacheaware: 95 },
@@ -325,7 +325,7 @@
       {
         key: 'rag',
         label: 'RAG / Retrieval',
-        icon: '🔍',
+        icon: '',
         title: 'Retrieval-Augmented Generation',
         description: 'Shared retrieval template with varying document chunks. The system prompt and template prefix are highly reusable.',
         ratings: { basic: 20, platform: 30, cacheaware: 90 },
@@ -335,7 +335,7 @@
       {
         key: 'code',
         label: 'Code Generation',
-        icon: '💻',
+        icon: '',
         title: 'Code Generation & Completion',
         description: 'IDE-style completions with shared file context across edits. High prefix reuse within editing sessions.',
         ratings: { basic: 25, platform: 35, cacheaware: 85 },
@@ -345,22 +345,22 @@
       {
         key: 'batch',
         label: 'Batch Processing',
-        icon: '📦',
+        icon: '',
         title: 'Batch / Bulk Inference',
         description: 'High-volume processing with unique prompts and minimal prefix overlap between requests.',
         ratings: { basic: 75, platform: 65, cacheaware: 50 },
         best: 'basic',
-        why: 'Batch processing with unique prompts has minimal prefix overlap, so cache-aware routing provides little benefit. <strong>The Basic stack\'s</strong> simplicity and low overhead actually wins here  --  round-robin distributes load evenly, and the runtime\'s continuous batching maximizes per-GPU throughput. No reason to pay for cache-aware routing overhead.'
+        why: 'Batch processing with unique prompts has minimal prefix overlap, so cache-aware routing provides little benefit. <strong>The Basic stack\'s</strong> simplicity and low overhead actually wins here -- round-robin distributes load evenly, and the runtime\'s continuous batching maximizes per-GPU throughput. No reason to pay for cache-aware routing overhead.'
       }
     ],
 
     STACK_DETAILS: {
       basic: {
         features: [
-          { icon: '⚡', text: 'Simple round-robin distributes requests evenly across pods' },
-          { icon: '💾', text: 'Each pod maintains its own local prefix cache (via vLLM/SGLang)' },
-          { icon: '🔧', text: 'Works anywhere  --  bare metal, VMs, or Kubernetes' },
-          { icon: '📊', text: 'Minimal operational complexity and routing overhead (<1ms)' }
+          { icon: 'fast', text: 'Simple round-robin distributes requests evenly across pods' },
+          { icon: 'cache', text: 'Each pod maintains its own local prefix cache (via vLLM/SGLang)' },
+          { icon: 'tool', text: 'Works anywhere -- bare metal, VMs, or Kubernetes' },
+          { icon: 'chart', text: 'Minimal operational complexity and routing overhead (<1ms)' }
         ],
         tradeoffs: 'Random routing means most requests miss the warm cache on multi-pod deployments. At 8 pods, only ~12.5% of follow-up requests hit the right cache.',
         bestFor: ['Batch processing', 'Single-pod deployments', 'Non-Kubernetes environments'],
@@ -368,24 +368,24 @@
       },
       platform: {
         features: [
-          { icon: '☸️', text: 'KServe provides Kubernetes-native model serving with InferenceService CRD' },
-          { icon: '🌐', text: 'Gateway API for standardized traffic management and routing' },
-          { icon: '📈', text: 'KPA/HPA autoscaling based on GPU utilization or request concurrency' },
-          { icon: '🔄', text: 'Canary and blue-green deployments for safe model rollouts' },
-          { icon: '🏗️', text: 'Multi-model serving on shared infrastructure' }
+          { icon: 'k8s', text: 'KServe provides Kubernetes-native model serving with InferenceService CRD' },
+          { icon: 'globe', text: 'Gateway API for standardized traffic management and routing' },
+          { icon: 'chart', text: 'KPA/HPA autoscaling based on GPU utilization or request concurrency' },
+          { icon: 'sync', text: 'Canary and blue-green deployments for safe model rollouts' },
+          { icon: 'build', text: 'Multi-model serving on shared infrastructure' }
         ],
-        tradeoffs: 'Adds Kubernetes dependency and operational complexity. Routing is still load-balanced  --  no cache awareness across pods.',
+        tradeoffs: 'Adds Kubernetes dependency and operational complexity. Routing is still load-balanced -- no cache awareness across pods.',
         bestFor: ['Production Kubernetes clusters', 'Teams needing autoscaling', 'Multi-model deployments'],
         metrics: { ttft32k: '~3,500ms', cacheHit: '~1/N pods', overhead: '~5ms' }
       },
       cacheaware: {
         features: [
-          { icon: '🧠', text: 'llm-d EPP tracks KV cache state across all pods in real time' },
-          { icon: '🎯', text: 'Routes requests to the pod with the warmest cache for that prefix' },
-          { icon: '⚡', text: 'Eliminates redundant GPU prefill  --  up to 47.5x faster TTFT at 32K context' },
-          { icon: '🔗', text: 'Built on KServe + Gateway API  --  all Platform stack benefits included' },
-          { icon: '🌍', text: 'CNCF Sandbox project with active community governance' },
-          { icon: '📡', text: 'Prefix-hash routing with load-aware fallback for optimal distribution' }
+          { icon: 'brain', text: 'llm-d EPP tracks KV cache state across all pods in real time' },
+          { icon: 'target', text: 'Routes requests to the pod with the warmest cache for that prefix' },
+          { icon: 'fast', text: 'Eliminates redundant GPU prefill -- up to 47.5x faster TTFT at 32K context' },
+          { icon: 'link', text: 'Built on KServe + Gateway API -- all Platform stack benefits included' },
+          { icon: 'globe', text: 'CNCF Sandbox project with active community governance' },
+          { icon: 'signal', text: 'Prefix-hash routing with load-aware fallback for optimal distribution' }
         ],
         tradeoffs: 'Requires Kubernetes and the full KServe + Gateway API stack. Best ROI with workloads that have high prefix overlap (chat, agentic, RAG).',
         bestFor: ['Multi-turn chat', 'Agentic workflows', 'RAG pipelines', 'High-volume inference'],
@@ -394,11 +394,11 @@
     },
 
     MATRIX_TOOLTIPS: {
-      'Local Prefix Caching (per pod)': 'Each runtime (vLLM/SGLang) caches KV tensors for recently-seen prefixes within a single pod. This is automatic  --  no extra infrastructure needed.',
+      'Local Prefix Caching (per pod)': 'Each runtime (vLLM/SGLang) caches KV tensors for recently-seen prefixes within a single pod. This is automatic -- no extra infrastructure needed.',
       'Cross-Pod Cache Coordination': 'Tracking which pods have which prefixes cached, so the router can make informed decisions. Only llm-d EPP does this.',
       'Cache-Aware Request Routing': 'Routing incoming requests to the specific pod that already has the matching prefix in its KV cache, avoiding redundant GPU compute.',
       'Real-Time KV Cache Tracking': 'llm-d EPP continuously monitors the KV cache state of every pod, enabling informed routing decisions even as cache contents change.',
-      'Cold-Start Elimination': 'When a pod has the prefix cached, TTFT drops from seconds to milliseconds  --  the GPU skips prefill entirely and goes straight to generation.',
+      'Cold-Start Elimination': 'When a pod has the prefix cached, TTFT drops from seconds to milliseconds -- the GPU skips prefill entirely and goes straight to generation.',
       'TTFT at 32K (avg with prefix reuse)': 'Average Time to First Token with 32K context length and high prefix overlap. Cache-aware routing eliminates the need to re-prefill the prompt.',
       'TTFT at 32K (lucky same-pod hit)': 'TTFT when a request happens to land on the pod with a warm cache by chance (round-robin) vs. by design (cache-aware).',
       'Routing Overhead': 'Additional latency added by the routing layer itself. All approaches add negligible overhead compared to GPU prefill time.',
@@ -409,7 +409,7 @@
       'Autoscaling': 'HPA = Horizontal Pod Autoscaler (CPU/memory-based). KPA = Knative Pod Autoscaler (concurrency/RPS-based, included with KServe).',
       'Canary / Blue-Green Deploys': 'Gradually rolling out a new model version alongside the existing one, routing a percentage of traffic to validate before full cutover.',
       'Multi-Model Serving': 'Running multiple models on the same infrastructure with shared GPU resources and independent scaling policies.',
-      'Production Readiness': 'Overall maturity for production workloads  --  covering monitoring, reliability, deployment patterns, and operational tooling.',
+      'Production Readiness': 'Overall maturity for production workloads -- covering monitoring, reliability, deployment patterns, and operational tooling.',
       'Multi-Turn Chat': 'Conversations where each message reuses the system prompt + prior conversation as a prefix. Very high prefix overlap.',
       'Agentic / Tool Calling': 'LLM agents that make iterative tool calls, each building on the same growing context. Extremely high prefix reuse.',
       'RAG / Retrieval': 'Retrieval-augmented generation with shared system prompts and retrieval templates. High prefix overlap from the template.',
@@ -486,22 +486,65 @@
       basic:      { low: 3, med: 0, high: -3, k8s_yes: -1, k8s_no: 3, auto_yes: -2, auto_no: 1, chat: -2, agentic: -2, rag: -2, batch: 3 },
       platform:   { low: 1, med: 1, high: -1, k8s_yes: 3, k8s_no: -3, auto_yes: 3, auto_no: -1, chat: 0, agentic: 0, rag: 0, batch: 1 },
       cacheaware: { low: -2, med: 2, high: 5, k8s_yes: 3, k8s_no: 0, auto_yes: 2, auto_no: 0, chat: 3, agentic: 3, rag: 3, batch: -2 }
+    },
+
+    COMPARE_DATA: {
+      'basic-platform': {
+        left: 'basic',
+        right: 'platform',
+        differences: [
+          { label: 'Routing', left: 'Round-robin LB', right: 'KServe + Gateway API' },
+          { label: 'Kubernetes', left: 'Not required', right: 'Required' },
+          { label: 'Autoscaling', left: 'HPA only', right: 'KPA / HPA' },
+          { label: 'Canary Deploys', left: 'No', right: 'Yes' },
+          { label: 'Cache Hit Rate', left: '~1/N pods', right: '~1/N pods' },
+          { label: 'TTFT at 32K', left: '~3,500ms', right: '~3,500ms' },
+          { label: 'Key Difference', left: 'Simpler, works anywhere', right: 'Better ops, same cache behavior' }
+        ]
+      },
+      'platform-cacheaware': {
+        left: 'platform',
+        right: 'cacheaware',
+        differences: [
+          { label: 'Routing Logic', left: 'Load-balanced', right: 'KV-cache-aware (EPP)' },
+          { label: 'Cache Hit Rate', left: '~1/N pods', right: '~95%' },
+          { label: 'TTFT at 32K', left: '~3,500ms', right: '~84ms' },
+          { label: 'Cross-Pod Coordination', left: 'No', right: 'Yes' },
+          { label: 'Cold-Start Elimination', left: 'No', right: 'Yes' },
+          { label: 'CNCF Status', left: 'Incubating (KServe)', right: 'Sandbox (llm-d)' },
+          { label: 'Key Difference', left: 'Good ops, cache-blind', right: '47.5x TTFT improvement' }
+        ]
+      },
+      'basic-cacheaware': {
+        left: 'basic',
+        right: 'cacheaware',
+        differences: [
+          { label: 'Stack Components', left: 'Runtime + LB', right: 'Runtime + KServe + Gateway + EPP' },
+          { label: 'Routing Strategy', left: 'Random', right: 'Cache-aware + load-aware' },
+          { label: 'Cache Hit Rate', left: '~1/N pods', right: '~95%' },
+          { label: 'TTFT at 32K', left: '~3,500ms', right: '~84ms' },
+          { label: 'Kubernetes', left: 'Not required', right: 'Required' },
+          { label: 'Complexity', left: 'Low', right: 'Medium' },
+          { label: 'Key Difference', left: 'Maximum simplicity', right: '47.5x faster with cache reuse' }
+        ]
+      }
     }
   };
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      STATE
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   var state = {
     activeStack: null,
     expandedCategories: { 0: true, 1: true, 2: true, 3: true, 4: true },
     activeScenario: 'chat',
-    decisionAnswers: {}
+    decisionAnswers: {},
+    activeComparison: null
   };
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      UTILITIES
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
@@ -525,11 +568,41 @@
     return CONFIG.STACKS.find(function (s) { return s.key === key; });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
+     FEATURE ICONS (SVG, warm-themed)
+     ====================================================================== */
+  var FEATURE_ICONS = {
+    fast: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    cache: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h4M6 14h8"/></svg>',
+    tool: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+    chart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+    k8s: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>',
+    globe: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+    sync: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+    build: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>',
+    brain: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/></svg>',
+    target: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    link: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>',
+    signal: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l5.5 5.5L12 13l4.5 4.5L22 12"/></svg>'
+  };
+
+  /* ======================================================================
+     SCENARIO ICONS (text-based, no emoji)
+     ====================================================================== */
+  var SCENARIO_ICONS = {
+    chat: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    agentic: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10M9 16v4M15 16v4M8 9h.01M12 9h.01M16 9h.01"/></svg>',
+    rag: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+    code: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+    batch: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12v3"/></svg>'
+  };
+
+  /* ======================================================================
      SCROLL PROGRESS
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function initScrollProgress() {
     var bar = $('#scrollProgress');
+    if (!bar) return;
     window.addEventListener('scroll', function () {
       var scrollTop = window.pageYOffset;
       var docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -537,9 +610,9 @@
     }, { passive: true });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      SCROLL REVEAL
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function initScrollReveal() {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -563,18 +636,19 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      STACK CARDS
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   var LAYER_COLORS = {
-    runtime: { bg: '#fef3e2', border: '#fcd78e', color: '#92400e' },
-    routing: { bg: '#fee2e2', border: '#fca5a5', color: '#991b1b' },
-    platform: { bg: '#dbeafe', border: '#93c5fd', color: '#1e40af' },
-    'routing-smart': { bg: '#d1fae5', border: '#6ee7b7', color: '#065f46' }
+    runtime: { bg: '#FFF5E6', border: '#E8C98E', color: '#8B5E14' },
+    routing: { bg: '#FDEAE5', border: '#E8A99A', color: '#8B2E1A' },
+    platform: { bg: '#E6EEF7', border: '#9BBDE0', color: '#2A5A8B' },
+    'routing-smart': { bg: '#E5F3EC', border: '#8EC9A8', color: '#1A5E3A' }
   };
 
   function renderStackCards() {
     var grid = $('#approachesGrid');
+    if (!grid) return;
     grid.innerHTML = CONFIG.STACKS.map(function (s, i) {
       var pillsHTML = s.pills.map(function (p) {
         return '<span class="approach-pill">' + p + '</span>';
@@ -585,12 +659,13 @@
           return '<div class="stack-layer" style="background:' + c.bg + ';border:1px solid ' + c.border + ';color:' + c.color + '">' +
             '<span class="stack-layer-name">' + l.name + '</span>' +
           '</div>';
-        }).join('<div class="stack-layer-connector">↕</div>') +
+        }).join('<div class="stack-layer-connector">&darr;</div>') +
       '</div>';
 
       var details = CONFIG.STACK_DETAILS[s.key];
       var featuresHTML = details.features.map(function (f) {
-        return '<div class="stack-detail-feature"><span class="stack-detail-icon">' + f.icon + '</span><span>' + f.text + '</span></div>';
+        var iconSvg = FEATURE_ICONS[f.icon] || '';
+        return '<div class="stack-detail-feature"><span class="stack-detail-icon">' + iconSvg + '</span><span>' + f.text + '</span></div>';
       }).join('');
       var bestForHTML = details.bestFor.map(function (b) {
         return '<span class="stack-detail-bestfor-tag">' + b + '</span>';
@@ -626,22 +701,25 @@
       if (state.activeStack === key) {
         state.activeStack = null;
         $$('.approach-card').forEach(function (c) { c.classList.remove('active'); });
-        $('#matrixGrid').removeAttribute('data-highlight');
+        var matrixGrid = $('#matrixGrid');
+        if (matrixGrid) matrixGrid.removeAttribute('data-highlight');
       } else {
         state.activeStack = key;
         $$('.approach-card').forEach(function (c) { c.classList.remove('active'); });
         card.classList.add('active');
         var idx = CONFIG.STACKS.findIndex(function (s) { return s.key === key; });
-        $('#matrixGrid').setAttribute('data-highlight', idx + 1);
+        var matrixGrid2 = $('#matrixGrid');
+        if (matrixGrid2) matrixGrid2.setAttribute('data-highlight', idx + 1);
       }
     });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      RUNTIME CALLOUT
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function renderRuntimeCallout() {
     var container = $('#runtimeCards');
+    if (!container) return;
     container.innerHTML = CONFIG.RUNTIMES.map(function (r) {
       var strengthsHTML = r.strengths.map(function (s) {
         return '<span class="runtime-strength">' + s + '</span>';
@@ -654,13 +732,13 @@
     }).join('');
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      COMPARISON MATRIX
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function renderCellContent(val, stackIdx) {
     var s = CONFIG.STACKS[stackIdx];
-    if (val.type === 'check') return '<div class="matrix-check">✓</div>';
-    if (val.type === 'cross') return '<div class="matrix-cross">✗</div>';
+    if (val.type === 'check') return '<div class="matrix-check">&#10003;</div>';
+    if (val.type === 'cross') return '<div class="matrix-cross">&#10007;</div>';
     if (val.type === 'value') return '<span class="matrix-value">' + val.text + '</span>';
     if (val.type === 'badge') return '<span class="matrix-badge matrix-badge--' + val.style + '">' + val.text + '</span>';
     if (val.type === 'dots') {
@@ -675,6 +753,7 @@
 
   function renderMatrix() {
     var grid = $('#matrixGrid');
+    if (!grid) return;
     var html = '';
 
     html += '<div class="matrix-col-headers">';
@@ -695,7 +774,7 @@
       html += '<div class="matrix-category' + (collapsed ? ' collapsed' : '') + '" data-cat="' + catIdx + '">';
       html += '<div class="matrix-category-header" data-cat-toggle="' + catIdx + '">' +
         '<span class="matrix-category-title">' + cat.title + '</span>' +
-        '<span class="matrix-category-chevron">›</span>' +
+        '<span class="matrix-category-chevron">&rsaquo;</span>' +
       '</div>';
 
       cat.rows.forEach(function (row) {
@@ -704,7 +783,7 @@
         if (tooltip) {
           html += '<div class="matrix-cell matrix-cell--has-tip" data-tip="' + tooltip.replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '">' +
             '<span>' + row.label + '</span>' +
-            '<span class="matrix-info-icon" aria-label="More info">ⓘ</span>' +
+            '<span class="matrix-info-icon" aria-label="More info">i</span>' +
           '</div>';
         } else {
           html += '<div class="matrix-cell">' + row.label + '</div>';
@@ -730,12 +809,13 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      PERFORMANCE CHART (SVG)
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function buildSvgChart() {
     var data = CONFIG.PERF_DATA;
     var container = $('#perfChart');
+    if (!container) return;
     var W = 800, H = 450;
     var pad = { top: 30, right: 40, bottom: 60, left: 70 };
     var cW = W - pad.left - pad.right;
@@ -752,16 +832,16 @@
     gridValues.forEach(function (v) {
       var y = yScale(v);
       svg += '<line class="perf-gridline" x1="' + pad.left + '" y1="' + y + '" x2="' + (W - pad.right) + '" y2="' + y + '"/>';
-      svg += '<text x="' + (pad.left - 10) + '" y="' + (y + 4) + '" text-anchor="end" fill="#64748b" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + v + 'ms</text>';
+      svg += '<text x="' + (pad.left - 10) + '" y="' + (y + 4) + '" text-anchor="end" fill="#8A8477" font-size="11" font-family="Source Code Pro,monospace">' + v + 'ms</text>';
     });
 
     contexts.forEach(function (ctx, i) {
       var x = xScale(i);
-      svg += '<text x="' + x + '" y="' + (H - 15) + '" text-anchor="middle" fill="#64748b" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + (ctx >= 1000 ? (ctx / 1000) + 'K' : ctx) + '</text>';
+      svg += '<text x="' + x + '" y="' + (H - 15) + '" text-anchor="middle" fill="#8A8477" font-size="11" font-family="Source Code Pro,monospace">' + (ctx >= 1000 ? (ctx / 1000) + 'K' : ctx) + '</text>';
     });
 
-    svg += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" text-anchor="middle" fill="#64748b" font-size="12" font-family="Red Hat Text,sans-serif">Context Length (tokens)</text>';
-    svg += '<text x="15" y="' + (H / 2) + '" text-anchor="middle" fill="#64748b" font-size="12" font-family="Red Hat Text,sans-serif" transform="rotate(-90,15,' + (H / 2) + ')">Time to First Token (ms)</text>';
+    svg += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" text-anchor="middle" fill="#8A8477" font-size="12" font-family="Source Sans 3,sans-serif">Context Length (tokens)</text>';
+    svg += '<text x="15" y="' + (H / 2) + '" text-anchor="middle" fill="#8A8477" font-size="12" font-family="Source Sans 3,sans-serif" transform="rotate(-90,15,' + (H / 2) + ')">Time to First Token (ms)</text>';
 
     CONFIG.STACKS.forEach(function (stack) {
       var points = data.stacks[stack.key];
@@ -775,7 +855,7 @@
     CONFIG.STACKS.forEach(function (stack) {
       var points = data.stacks[stack.key];
       points.forEach(function (v, i) {
-        svg += '<circle cx="' + xScale(i).toFixed(1) + '" cy="' + yScale(v).toFixed(1) + '" r="4" fill="' + stack.color + '" stroke="#111827" stroke-width="2" data-tooltip="' + stack.name + ': ' + v + 'ms at ' + contexts[i] + ' tokens" style="cursor:pointer;opacity:0" class="perf-point">';
+        svg += '<circle cx="' + xScale(i).toFixed(1) + '" cy="' + yScale(v).toFixed(1) + '" r="4" fill="' + stack.color + '" stroke="#FFFFFF" stroke-width="2" data-tooltip="' + stack.name + ': ' + v + 'ms at ' + contexts[i] + ' tokens" style="cursor:pointer;opacity:0" class="perf-point">';
         svg += '<animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="1.5s" fill="freeze"/>';
         svg += '</circle>';
       });
@@ -788,7 +868,8 @@
       $$('.perf-line', container).forEach(function (line) {
         line.classList.add('animated');
       });
-      $('#perfAnnotation').classList.add('visible');
+      var annotation = $('#perfAnnotation');
+      if (annotation) annotation.classList.add('visible');
     }, 300);
 
     var tooltip = $('#perfTooltip');
@@ -869,6 +950,7 @@
 
   function renderPerfLegend() {
     var container = $('#perfLegend');
+    if (!container) return;
     container.innerHTML = CONFIG.STACKS.map(function (s) {
       return '<div class="perf-legend-item">' +
         '<span class="perf-legend-line" style="background:' + s.color + '"></span>' +
@@ -877,14 +959,16 @@
     }).join('');
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      SCENARIO EXPLORER
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function renderScenarioTabs() {
     var container = $('#scenarioTabs');
+    if (!container) return;
     container.innerHTML = CONFIG.SCENARIOS.map(function (s) {
+      var iconSvg = SCENARIO_ICONS[s.key] || '';
       return '<button class="scenario-tab' + (s.key === state.activeScenario ? ' active' : '') + '" data-scenario="' + s.key + '">' +
-        s.icon + ' ' + s.label + '</button>';
+        '<span class="scenario-tab-icon">' + iconSvg + '</span> ' + s.label + '</button>';
     }).join('');
 
     container.addEventListener('click', function (e) {
@@ -899,10 +983,12 @@
 
   function renderScenarioContent() {
     var container = $('#scenarioContent');
+    if (!container) return;
     var s = CONFIG.SCENARIOS.find(function (sc) { return sc.key === state.activeScenario; });
     if (!s) return;
 
     var scenarioMetrics = CONFIG.SCENARIO_METRICS[s.key];
+    var iconSvg = SCENARIO_ICONS[s.key] || '';
 
     var cardsHTML = CONFIG.STACKS.map(function (stack) {
       var rating = s.ratings[stack.key];
@@ -927,25 +1013,23 @@
     }).join('');
 
     var newHTML = '<div class="scenario-header">' +
-      '<span class="scenario-icon">' + s.icon + '</span>' +
+      '<span class="scenario-icon">' + iconSvg + '</span>' +
       '<div><h3>' + s.title + '</h3><p>' + s.description + '</p></div>' +
     '</div>' +
     '<div class="scenario-comparison">' + cardsHTML + '</div>' +
     '<div class="scenario-why">' + s.why + '</div>';
 
-    // Smooth fade transition when switching tabs
+    // Smooth fade transition
     container.style.opacity = '0';
     container.style.transform = 'translateY(10px)';
 
     setTimeout(function () {
       container.innerHTML = newHTML;
-      // Trigger reflow then transition back
       requestAnimationFrame(function () {
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
       });
 
-      // Animate bars after content is inserted
       setTimeout(function () {
         $$('.scenario-bar-fill', container).forEach(function (bar) {
           var w = bar.style.width;
@@ -958,11 +1042,12 @@
     }, 50);
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      DECISION GUIDE
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function renderDecisionQuestions() {
     var container = $('#decisionQuestions');
+    if (!container) return;
     container.innerHTML = CONFIG.DECISION_QUESTIONS.map(function (q, qi) {
       var toggles = q.options.map(function (o) {
         var active = state.decisionAnswers[qi] === o.key;
@@ -1008,6 +1093,7 @@
 
   function renderDecisionResult() {
     var container = $('#decisionResult');
+    if (!container) return;
     var answered = Object.keys(state.decisionAnswers).length;
 
     if (answered === 0) {
@@ -1021,11 +1107,11 @@
     var topKey = result.sorted[0];
     var top = getStack(topKey);
     var confidence = answered >= 3 ? 'High' : (answered >= 2 ? 'Medium' : 'Low');
-    var confColor = answered >= 3 ? 'var(--color-llmd-bright)' : (answered >= 2 ? '#c05621' : 'var(--color-text-muted)');
+    var confColor = answered >= 3 ? '#2E7D52' : (answered >= 2 ? '#B5793A' : '#8A8477');
 
     var explanations = {
-      cacheaware: 'The Cache-Aware stack (vLLM/SGLang + KServe + llm-d EPP) routes requests to pods with warm KV caches. For workloads with high prefix overlap  --  chat, agentic, RAG  --  this eliminates redundant GPU compute and can reduce TTFT by up to 47.5x.',
-      platform: 'The Platform stack (vLLM/SGLang + KServe) gives you Kubernetes-native model serving with autoscaling, Gateway API, and canary deploys. Great operational foundation, but routing is still load-balanced  --  no cache awareness.',
+      cacheaware: 'The Cache-Aware stack (vLLM/SGLang + KServe + llm-d EPP) routes requests to pods with warm KV caches. For workloads with high prefix overlap -- chat, agentic, RAG -- this eliminates redundant GPU compute and can reduce TTFT by up to 47.5x.',
+      platform: 'The Platform stack (vLLM/SGLang + KServe) gives you Kubernetes-native model serving with autoscaling, Gateway API, and canary deploys. Great operational foundation, but routing is still load-balanced -- no cache awareness.',
       basic: 'The Basic stack (vLLM/SGLang + round-robin LB) is the simplest deployment. Best for batch workloads with unique prompts where cache-aware routing adds no value, or for non-Kubernetes environments.'
     };
 
@@ -1043,7 +1129,7 @@
         '<span class="decision-result-dot" style="background:' + top.color + '"></span>' +
         '<span class="decision-result-name">' + top.name + '</span>' +
       '</div>' +
-      '<div class="decision-result-confidence" style="background:' + confColor + '22;color:' + confColor + ';border:1px solid ' + confColor + '33">' + confidence + ' confidence</div>' +
+      '<div class="decision-result-confidence" style="background:' + confColor + '15;color:' + confColor + ';border:1px solid ' + confColor + '30">' + confidence + ' confidence</div>' +
       '<div class="decision-result-explanation">' + explanations[topKey] + '</div>' +
       '<div class="decision-result-also">' +
         '<div class="decision-result-also-title">Also Consider</div>' +
@@ -1051,11 +1137,12 @@
       '</div>';
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      MATRIX TOOLTIP
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function initMatrixTooltips() {
     var matrixGrid = $('#matrixGrid');
+    if (!matrixGrid) return;
     var tipEl = document.createElement('div');
     tipEl.className = 'matrix-tooltip';
     document.body.appendChild(tipEl);
@@ -1081,9 +1168,9 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      ARCHITECTURE ANIMATION
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function initArchAnimation() {
     var columns = $$('.arch-column');
     columns.forEach(function (col) {
@@ -1108,97 +1195,71 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════════════
-     PARTICLE CANVAS BACKGROUND
-     ══════════════════════════════════════════════════════════ */
-  function initParticleBackground() {
-    var canvas = document.createElement('canvas');
-    canvas.id = 'particleCanvas';
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
-    document.body.insertBefore(canvas, document.body.firstChild);
+  /* ======================================================================
+     COMPARE THESE TWO (side-by-side animated comparison)
+     ====================================================================== */
+  function initCompareButtons() {
+    var buttons = $$('.compare-btn');
+    var panel = $('#comparisonPanel');
+    if (!panel || buttons.length === 0) return;
 
-    var ctx = canvas.getContext('2d');
-    var particles = [];
-    var PARTICLE_COUNT = 70;
-    var COLORS = [
-      { r: 56, g: 161, b: 105 },   // llm-d green #38a169
-      { r: 59, g: 130, b: 246 },    // accent blue #3b82f6
-      { r: 255, g: 255, b: 255 }    // white
-    ];
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var compareKey = btn.getAttribute('data-compare');
 
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function createParticle() {
-      var colorIdx = Math.floor(Math.random() * COLORS.length);
-      var c = COLORS[colorIdx];
-      var opacity = colorIdx === 2 ? 0.15 + Math.random() * 0.15 : 0.2 + Math.random() * 0.2;
-      return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: 1 + Math.random() * 2,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        color: c,
-        opacity: opacity
-      };
-    }
-
-    for (var i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(createParticle());
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw connection lines between nearby particles
-      for (var i = 0; i < particles.length; i++) {
-        for (var j = i + 1; j < particles.length; j++) {
-          var dx = particles[i].x - particles[j].x;
-          var dy = particles[i].y - particles[j].y;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            var lineOpacity = 0.03 + (1 - dist / 150) * 0.05;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = 'rgba(56, 161, 105, ' + lineOpacity + ')';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
+        // Toggle off if same button clicked
+        if (state.activeComparison === compareKey) {
+          state.activeComparison = null;
+          panel.innerHTML = '';
+          panel.classList.remove('active');
+          $$('.compare-btn').forEach(function (b) { b.classList.remove('active'); });
+          return;
         }
-      }
 
-      // Draw particles
-      for (var k = 0; k < particles.length; k++) {
-        var p = particles[k];
-        p.x += p.vx;
-        p.y += p.vy;
+        state.activeComparison = compareKey;
+        $$('.compare-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
 
-        // Wrap around edges
-        if (p.x < -10) p.x = canvas.width + 10;
-        if (p.x > canvas.width + 10) p.x = -10;
-        if (p.y < -10) p.y = canvas.height + 10;
-        if (p.y > canvas.height + 10) p.y = -10;
+        var data = CONFIG.COMPARE_DATA[compareKey];
+        if (!data) return;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(' + p.color.r + ',' + p.color.g + ',' + p.color.b + ',' + p.opacity + ')';
-        ctx.fill();
-      }
+        var leftStack = getStack(data.left);
+        var rightStack = getStack(data.right);
 
-      requestAnimationFrame(draw);
-    }
-    requestAnimationFrame(draw);
+        var rowsHTML = data.differences.map(function (diff, idx) {
+          return '<div class="compare-row" style="animation-delay:' + (idx * 0.08) + 's">' +
+            '<div class="compare-cell compare-cell--left" style="border-left:3px solid ' + leftStack.color + '">' +
+              '<div class="compare-cell-label">' + diff.label + '</div>' +
+              '<div class="compare-cell-value">' + diff.left + '</div>' +
+            '</div>' +
+            '<div class="compare-vs">vs</div>' +
+            '<div class="compare-cell compare-cell--right" style="border-left:3px solid ' + rightStack.color + '">' +
+              '<div class="compare-cell-label">' + diff.label + '</div>' +
+              '<div class="compare-cell-value">' + diff.right + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        panel.innerHTML = '<div class="compare-header">' +
+          '<div class="compare-header-left" style="color:' + leftStack.color + '">' + leftStack.name + '</div>' +
+          '<div class="compare-header-vs">Side-by-Side</div>' +
+          '<div class="compare-header-right" style="color:' + rightStack.color + '">' + rightStack.name + '</div>' +
+        '</div>' +
+        '<div class="compare-rows">' + rowsHTML + '</div>';
+
+        panel.classList.add('active');
+
+        // Scroll to panel
+        setTimeout(function () {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      });
+    });
   }
 
-  /* ══════════════════════════════════════════════════════════
-     LOADING SKELETON / SHIMMER
-     ══════════════════════════════════════════════════════════ */
+  /* ======================================================================
+     LOADING OVERLAY (warm theme)
+     ====================================================================== */
   function initLoadingSkeleton() {
     var overlay = document.createElement('div');
     overlay.className = 'loading-skeleton';
@@ -1215,12 +1276,11 @@
     }, 1200);
   }
 
-  /* ══════════════════════════════════════════════════════════
+  /* ======================================================================
      INIT
-     ══════════════════════════════════════════════════════════ */
+     ====================================================================== */
   function init() {
     initLoadingSkeleton();
-    initParticleBackground();
     renderStackCards();
     renderRuntimeCallout();
     renderMatrix();
@@ -1234,6 +1294,7 @@
     initScrollProgress();
     initScrollReveal();
     initArchAnimation();
+    initCompareButtons();
   }
 
   if (document.readyState === 'loading') {

@@ -7,10 +7,13 @@
   <meta name="description" content="Interactive comparison of 3 LLM inference deployment stacks: Basic, Platform, and Cache-Aware routing with llm-d.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;600;700;800;900&family=Red+Hat+Mono:wght@400;500;600;700&family=Red+Hat+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
+<!-- Background gradient flow -->
+<div class="bg-gradient-flow"></div>
 
 <!-- Scroll Progress -->
 <div class="scroll-progress" id="scrollProgress"></div>
@@ -33,14 +36,17 @@
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════════════ HERO ═══ -->
-<section class="hero">
-  <div class="hero-orb-accent"></div>
+<!-- ═══════════════════════════════════════════════════ CHAPTER 1: THE LANDSCAPE ═══ -->
+<section class="hero" id="chapter-landscape">
   <div class="container">
-    <p class="hero-tagline reveal">Comparing deployment stacks for LLM inference routing</p>
-    <h1 class="hero-title reveal reveal-delay-1">The Inference Routing<br>Landscape</h1>
-    <p class="hero-description reveal reveal-delay-2">
-      Every LLM deployment combines a runtime, a routing strategy, and optionally a serving platform. Understand the three deployment stacks  --  and where cache-aware routing delivers a step-change in performance.
+    <div class="chapter-marker reveal">
+      <span class="chapter-number">Chapter One</span>
+      <span class="chapter-line"></span>
+    </div>
+    <p class="hero-tagline reveal reveal-delay-1">Comparing deployment stacks for LLM inference routing</p>
+    <h1 class="hero-title reveal reveal-delay-2">The Inference Routing<br>Landscape</h1>
+    <p class="hero-description reveal reveal-delay-3">
+      Every LLM deployment combines a runtime, a routing strategy, and optionally a serving platform. This is the story of three deployment stacks -- from simple round-robin to cache-aware intelligence -- and where each one shines.
     </p>
     <div class="hero-stats reveal reveal-delay-3">
       <div class="stat-card">
@@ -59,12 +65,16 @@
   </div>
 </section>
 
-<hr class="section-divider">
+<div class="chapter-divider"><span class="divider-ornament"></span></div>
 
-<!-- ═══════════════════════════════════ DEPLOYMENT STACK CARDS ═══ -->
-<section class="approaches" id="approaches">
+<!-- ═══════════════════════════════════════════════════ CHAPTER 2: THE CONTENDERS ═══ -->
+<section class="approaches" id="chapter-contenders">
   <div class="container">
-    <h2 class="section-title reveal">Three Deployment Stacks</h2>
+    <div class="chapter-marker reveal">
+      <span class="chapter-number">Chapter Two</span>
+      <span class="chapter-line"></span>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">The Contenders</h2>
     <p class="section-description reveal reveal-delay-1">Every stack uses a runtime (vLLM or SGLang). The difference is in how requests are routed. Click a stack to highlight its column in the comparison matrix.</p>
     <div class="approaches-grid" id="approachesGrid">
       <!-- JS renders 3 stack cards -->
@@ -72,7 +82,7 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════════ RUNTIME CALLOUT ═══ -->
+<!-- Runtime Callout -->
 <section class="runtimes" id="runtimes">
   <div class="container">
     <div class="runtime-callout reveal">
@@ -87,26 +97,7 @@
   </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ═══════════════════════════════ COMPARISON MATRIX ═══ -->
-<section class="comparison" id="comparison">
-  <div class="container">
-    <h2 class="section-title reveal">Interactive Comparison Matrix</h2>
-    <p class="section-description reveal reveal-delay-1">Expand categories, hover columns, and compare the three stacks at a glance.</p>
-    <div class="matrix-wrapper reveal reveal-delay-2">
-      <div class="matrix-scroll">
-        <div class="matrix-grid" id="matrixGrid">
-          <!-- JS renders matrix -->
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="section-divider">
-
-<!-- ═══════════════════════════════ ARCHITECTURE DIAGRAM ═══ -->
+<!-- Architecture Comparison -->
 <section class="architecture" id="architecture">
   <div class="container">
     <h2 class="section-title reveal">Architecture Comparison</h2>
@@ -119,7 +110,7 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--rr" title="Distributes requests evenly across pods  --  no awareness of cache state">Round-Robin LB</div>
+          <div class="arch-node arch-node--rr" title="Distributes requests evenly across pods -- no awareness of cache state">Round-Robin LB</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
             <div class="arch-node arch-node--pod" title="Each pod has local prefix caching, but routing is random">vLLM Pod 1</div>
@@ -136,12 +127,12 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API  --  standardized traffic management, TLS, and routing rules">Gateway API</div>
+          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API -- standardized traffic management, TLS, and routing rules">Gateway API</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--kserve" title="KServe InferenceService  --  autoscaling, model lifecycle management, traffic splitting">KServe Router</div>
+          <div class="arch-node arch-node--kserve" title="KServe InferenceService -- autoscaling, model lifecycle management, traffic splitting">KServe Router</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Same runtime, better ops  --  but routing is still load-balanced">vLLM Pod 1</div>
+            <div class="arch-node arch-node--pod" title="Same runtime, better ops -- but routing is still load-balanced">vLLM Pod 1</div>
             <div class="arch-node arch-node--pod">vLLM Pod 2</div>
             <div class="arch-node arch-node--pod">vLLM Pod 3</div>
           </div>
@@ -155,14 +146,14 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API  --  same as Platform stack">Gateway API</div>
+          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API -- same as Platform stack">Gateway API</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--llmd" title="llm-d Endpoint Picker Policy  --  hashes the prefix, checks which pod has it cached, routes there">llm-d EPP</div>
+          <div class="arch-node arch-node--llmd" title="llm-d Endpoint Picker Policy -- hashes the prefix, checks which pod has it cached, routes there">llm-d EPP</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Pod 1 has the warmest cache  --  EPP routes matching requests here">vLLM Pod 1<br><span style="font-size:9px;opacity:0.7">KV Cache ████</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 2 has a partial cache  --  used for load balancing when Pod 1 is busy">vLLM Pod 2<br><span style="font-size:9px;opacity:0.7">KV Cache ██</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 3 has minimal cache  --  receives requests with new prefixes">vLLM Pod 3<br><span style="font-size:9px;opacity:0.7">KV Cache █</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 1 has the warmest cache -- EPP routes matching requests here">vLLM Pod 1<br><span style="font-size:9px;opacity:0.7">KV Cache ████</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 2 has a partial cache -- used for load balancing when Pod 1 is busy">vLLM Pod 2<br><span style="font-size:9px;opacity:0.7">KV Cache ██</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 3 has minimal cache -- receives requests with new prefixes">vLLM Pod 3<br><span style="font-size:9px;opacity:0.7">KV Cache █</span></div>
           </div>
         </div>
         <div class="arch-column-summary">Hover to see request flow</div>
@@ -170,20 +161,49 @@
 
     </div>
 
+    <!-- Compare These Two buttons -->
+    <div class="compare-buttons reveal reveal-delay-4">
+      <button class="compare-btn" data-compare="basic-platform">Compare Basic vs Platform</button>
+      <button class="compare-btn" data-compare="platform-cacheaware">Compare Platform vs Cache-Aware</button>
+      <button class="compare-btn" data-compare="basic-cacheaware">Compare Basic vs Cache-Aware</button>
+    </div>
+
+    <!-- Comparison panel container -->
+    <div class="comparison-panel" id="comparisonPanel"></div>
+
     <div class="arch-note reveal reveal-delay-4">
-      <strong>These stacks build on each other.</strong> The Cache-Aware stack uses KServe for deployment and vLLM/SGLang as the runtime  --  it adds llm-d's Endpoint Picker Policy (EPP) for cache-aware request routing on top of production infrastructure.
+      <strong>These stacks build on each other.</strong> The Cache-Aware stack uses KServe for deployment and vLLM/SGLang as the runtime -- it adds llm-d's Endpoint Picker Policy (EPP) for cache-aware request routing on top of production infrastructure.
     </div>
 
   </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ═══════════════════════════════ PERFORMANCE CHART ═══ -->
-<section class="performance" id="performance">
+<!-- Interactive Comparison Matrix -->
+<section class="comparison" id="comparison">
   <div class="container">
-    <h2 class="section-title reveal">TTFT Performance by Context Length</h2>
-    <p class="section-description reveal reveal-delay-1">Time to First Token (TTFT) measured on H200 GPUs with Llama 3.1 70B. All stacks use vLLM  --  the only difference is routing strategy.</p>
+    <h2 class="section-title reveal">Interactive Comparison Matrix</h2>
+    <p class="section-description reveal reveal-delay-1">Expand categories, hover columns, and compare the three stacks at a glance.</p>
+    <div class="matrix-wrapper reveal reveal-delay-2">
+      <div class="matrix-scroll">
+        <div class="matrix-grid" id="matrixGrid">
+          <!-- JS renders matrix -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="chapter-divider"><span class="divider-ornament"></span></div>
+
+<!-- ═══════════════════════════════════════════════════ CHAPTER 3: YOUR DECISION ═══ -->
+<section class="performance" id="chapter-decision">
+  <div class="container">
+    <div class="chapter-marker reveal">
+      <span class="chapter-number">Chapter Three</span>
+      <span class="chapter-line"></span>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">Your Decision</h2>
+    <p class="section-description reveal reveal-delay-1">Time to First Token (TTFT) measured on H200 GPUs with Llama 3.1 70B. All stacks use vLLM -- the only difference is routing strategy.</p>
     <div class="perf-chart-wrapper reveal reveal-delay-2">
       <div class="perf-chart-container" id="perfChart">
         <!-- JS renders SVG chart -->
@@ -200,13 +220,11 @@
   </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ═══════════════════════════════ SCENARIO EXPLORER ═══ -->
+<!-- Scenario Explorer -->
 <section class="scenarios" id="scenarios">
   <div class="container">
     <h2 class="section-title reveal">Scenario Explorer</h2>
-    <p class="section-description reveal reveal-delay-1">Different workloads favor different stacks. Explore which one wins  --  and why  --  for your use case.</p>
+    <p class="section-description reveal reveal-delay-1">Different workloads favor different stacks. Explore which one wins -- and why -- for your use case.</p>
     <div class="scenario-tabs reveal reveal-delay-2" id="scenarioTabs">
       <!-- JS renders tabs -->
     </div>
@@ -216,9 +234,7 @@
   </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ═══════════════════════════════ DECISION GUIDE ═══ -->
+<!-- Decision Guide -->
 <section class="decision" id="decision">
   <div class="container">
     <h2 class="section-title reveal">Which Stack Is Right for You?</h2>
@@ -234,40 +250,73 @@
   </div>
 </section>
 
-<hr class="section-divider">
+<div class="chapter-divider"><span class="divider-ornament"></span></div>
 
-<!-- ═══════════════════════════════ METHODOLOGY ═══ -->
-<section class="methodology" id="methodology">
+<!-- ═══════════════════════════════════════════════════ CHAPTER 4: THE VERDICT ═══ -->
+<section class="methodology" id="chapter-verdict">
   <div class="container">
-    <h2 class="section-title reveal">Methodology &amp; Sources</h2>
-    <p class="section-description reveal reveal-delay-1">How we characterized each deployment stack and where the data comes from.</p>
-    <div class="method-grid reveal reveal-delay-2">
+    <div class="chapter-marker reveal">
+      <span class="chapter-number">Chapter Four</span>
+      <span class="chapter-line"></span>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">The Verdict</h2>
+    <p class="section-description reveal reveal-delay-1">How we characterized each deployment stack, where the data comes from, and an honest take on when cache-aware routing is worth it.</p>
+
+    <!-- Honest Assessment -->
+    <div class="verdict-assessment reveal reveal-delay-2">
+      <h3 class="verdict-assessment-title">When Cache-Aware Routing Is Worth It -- and When It Isn't</h3>
+      <div class="verdict-columns">
+        <div class="verdict-col verdict-col--worth">
+          <div class="verdict-col-heading">Worth the investment when...</div>
+          <ul class="verdict-list">
+            <li>Your workload has high prefix overlap -- multi-turn chat, agentic workflows, RAG with shared templates</li>
+            <li>You are already running Kubernetes with KServe or planning to</li>
+            <li>Context lengths regularly exceed 4K tokens, where cache savings compound</li>
+            <li>You need consistent low-latency TTFT, not just good average throughput</li>
+            <li>You are scaling to multiple GPU pods and cache misses are wasting expensive compute</li>
+          </ul>
+        </div>
+        <div class="verdict-col verdict-col--not">
+          <div class="verdict-col-heading">Probably not worth it when...</div>
+          <ul class="verdict-list">
+            <li>Your prompts are mostly unique with little prefix reuse -- batch processing, one-shot classification</li>
+            <li>You are running a single GPU pod -- local caching already handles everything</li>
+            <li>You do not use Kubernetes and do not plan to -- the Platform stack adds real complexity</li>
+            <li>Context lengths are short (under 1K tokens) -- the prefill savings are minimal</li>
+            <li>Simplicity matters more than performance -- the Basic stack is genuinely simpler to operate</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Methodology & Sources -->
+    <div class="method-grid reveal reveal-delay-3">
 
       <details class="method-item">
         <summary>Benchmark Hardware &amp; Configuration</summary>
         <div class="method-item-body">
-          <p>TTFT benchmarks were run on NVIDIA H200 GPUs with Llama 3.1 70B using vLLM as the runtime across all three stacks. Context lengths range from 500 to 32,768 tokens. The KV cache hit rate models 80–95% prefix reuse for multi-turn and RAG workloads, reflecting production patterns with shared system prompts.</p>
+          <p>TTFT benchmarks were run on NVIDIA H200 GPUs with Llama 3.1 70B using vLLM as the runtime across all three stacks. Context lengths range from 500 to 32,768 tokens. The KV cache hit rate models 80--95% prefix reuse for multi-turn and RAG workloads, reflecting production patterns with shared system prompts.</p>
         </div>
       </details>
 
       <details class="method-item">
         <summary>Stack-Based Comparison</summary>
         <div class="method-item-body">
-          <p>This comparison evaluates three deployment stacks, not individual products. Every stack uses the same runtime (vLLM or SGLang)  --  the difference is the routing and deployment layer. The Basic stack uses simple round-robin. The Platform stack adds KServe for Kubernetes-native operations. The Cache-Aware stack adds llm-d's EPP for KV-cache-aware routing.</p>
+          <p>This comparison evaluates three deployment stacks, not individual products. Every stack uses the same runtime (vLLM or SGLang) -- the difference is the routing and deployment layer. The Basic stack uses simple round-robin. The Platform stack adds KServe for Kubernetes-native operations. The Cache-Aware stack adds llm-d's EPP for KV-cache-aware routing.</p>
         </div>
       </details>
 
       <details class="method-item">
         <summary>Cache Savings Estimates</summary>
         <div class="method-item-body">
-          <p>Cache-aware savings come from routing requests to pods with warm KV caches. At 32K context with high prefix overlap, llm-d's EPP achieves up to 47.5x TTFT reduction vs round-robin. Savings vary by workload: multi-turn chat sees ~40x, RAG ~35x, agentic ~30x. Batch processing with unique prompts shows minimal cache benefit  --  round-robin may actually be preferable.</p>
+          <p>Cache-aware savings come from routing requests to pods with warm KV caches. At 32K context with high prefix overlap, llm-d's EPP achieves up to 47.5x TTFT reduction vs round-robin. Savings vary by workload: multi-turn chat sees ~40x, RAG ~35x, agentic ~30x. Batch processing with unique prompts shows minimal cache benefit -- round-robin may actually be preferable.</p>
         </div>
       </details>
 
       <details class="method-item">
         <summary>Data Sources &amp; Limitations</summary>
         <div class="method-item-body">
-          <p>Data sources include llm-d project benchmarks, vLLM/SGLang documentation, KServe architecture docs, and CNCF project materials. Limitations: local prefix caching within a pod (provided by the runtime) is present in all three stacks  --  the cache-aware advantage comes from cross-pod coordination. Real-world results depend on hardware, model size, prompt patterns, and cluster configuration.</p>
+          <p>Data sources include llm-d project benchmarks, vLLM/SGLang documentation, KServe architecture docs, and CNCF project materials. Limitations: local prefix caching within a pod (provided by the runtime) is present in all three stacks -- the cache-aware advantage comes from cross-pod coordination. Real-world results depend on hardware, model size, prompt patterns, and cluster configuration.</p>
         </div>
       </details>
 
@@ -278,7 +327,7 @@
 <!-- Footer -->
 <footer class="site-footer">
   <div class="container">
-    <div class="footer-brand">llm-d  --  CNCF Sandbox Project</div>
+    <div class="footer-brand">llm-d -- CNCF Sandbox Project</div>
     <div class="footer-links">
       <a href="https://github.com/llm-d" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.cncf.io/projects/llm-d/" target="_blank" rel="noopener">CNCF</a>
