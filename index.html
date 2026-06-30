@@ -409,13 +409,14 @@ h1, h2, h3, h4 {
   width: 100%; height: 100%;
 }
 .canvas-legend {
-  position: absolute; bottom: 16px; left: 50%;
+  position: absolute; top: 16px; left: 50%;
   transform: translateX(-50%);
   display: flex; gap: 24px;
   background: rgba(255,255,255,0.92);
   backdrop-filter: blur(8px);
   padding: 8px 20px; border-radius: 20px;
   border: 1px solid rgba(232,226,217,0.6);
+  z-index: 5;
 }
 .legend-item {
   display: flex; align-items: center; gap: 8px;
@@ -720,7 +721,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 2: THE FOUR APPROACHES ===== -->
 <div class="slide" id="slide-1">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter One</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 1</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">The Routing Approaches</h2>
   <p class="anim-in anim-d3 slide-subtitle" style="margin-bottom:12px;">
     The runtime (vLLM, SGLang) is an orthogonal choice. The difference is how requests find their way to pods.
@@ -753,7 +754,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 3: ROUTING FLOW ANIMATION ===== -->
 <div class="slide" id="slide-2">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter Two</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 2</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">How Requests Flow</h2>
   <p class="anim-in anim-d3 slide-subtitle">
     Watch three request flows side by side. Round-robin scatters requests randomly.
@@ -768,7 +769,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 4: THREE DEPLOYMENT STACKS ===== -->
 <div class="slide" id="slide-3">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter Three</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 3</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">Three Deployment Stacks</h2>
   <p class="anim-in anim-d3 slide-subtitle" style="margin-bottom:4px;">
     Each stack builds on the one before it. The Cache-Aware stack adds llm-d's EPP on top of KServe.
@@ -827,7 +828,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 5: PERFORMANCE CHART ===== -->
 <div class="slide" id="slide-4">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter Four</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 4</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">The Performance Gap</h2>
   <p class="anim-in anim-d3 slide-subtitle">
     TTFT measured on H200 GPUs with Llama 3.1 70B. Same runtime (vLLM) -- only the routing changes.
@@ -849,7 +850,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 6: SCENARIO COMPARISON ===== -->
 <div class="slide" id="slide-5">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter Five</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 5</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">Which Workload Wins Where?</h2>
   <p class="anim-in anim-d3 slide-subtitle">
     Different workloads favor different routing. Cache-aware routing dominates when prefix overlap is high.
@@ -982,7 +983,7 @@ h1, h2, h3, h4 {
 <!-- ===== SLIDE 7: THE VERDICT ===== -->
 <div class="slide" id="slide-6">
 <div class="slide-inner">
-  <div class="anim-in anim-d1 slide-tagline">Chapter Six</div>
+  <div class="anim-in anim-d1 slide-tagline">Slide 6</div>
   <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">When Cache-Aware Routing Is Worth It</h2>
   <p class="anim-in anim-d3 slide-subtitle">
     An honest assessment. Cache-aware routing is not always the answer -- here is when it matters and when it does not.
