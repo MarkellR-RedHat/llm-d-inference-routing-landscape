@@ -2,14 +2,14 @@
   'use strict';
 
   /* ══════════════════════════════════════════════════════════
-     CONFIG — All data inlined
+     CONFIG  --  All data inlined
      ══════════════════════════════════════════════════════════ */
   var CONFIG = {
     STACKS: [
       {
         key: 'basic',
         name: 'Basic Stack',
-        tagline: 'Runtime behind a round-robin load balancer. Each pod has local prefix caching, but routing is random — most requests miss the warm cache.',
+        tagline: 'Runtime behind a round-robin load balancer. Each pod has local prefix caching, but routing is random  --  most requests miss the warm cache.',
         color: '#e53e3e',
         cssClass: 'basic',
         layers: [
@@ -21,7 +21,7 @@
       {
         key: 'platform',
         name: 'Platform Stack',
-        tagline: 'Adds KServe and Gateway API for Kubernetes-native deployment, autoscaling, and traffic management. Routing is still load-balanced — no cache awareness.',
+        tagline: 'Adds KServe and Gateway API for Kubernetes-native deployment, autoscaling, and traffic management. Routing is still load-balanced  --  no cache awareness.',
         color: '#2b6cb0',
         cssClass: 'platform',
         layers: [
@@ -34,7 +34,7 @@
       {
         key: 'cacheaware',
         name: 'Cache-Aware Stack',
-        tagline: 'Everything in the Platform stack, plus llm-d\'s Endpoint Picker Policy (EPP). Routes requests to pods with warm KV caches — up to 47.5x faster TTFT.',
+        tagline: 'Everything in the Platform stack, plus llm-d\'s Endpoint Picker Policy (EPP). Routes requests to pods with warm KV caches  --  up to 47.5x faster TTFT.',
         color: '#38a169',
         cssClass: 'cacheaware',
         layers: [
@@ -310,7 +310,7 @@
         description: 'Shared system prompts and growing conversation history create high prefix overlap across requests.',
         ratings: { basic: 20, platform: 30, cacheaware: 95 },
         best: 'cacheaware',
-        why: 'Multi-turn chat has extremely high prefix overlap — every message reuses the system prompt and prior conversation. With round-robin routing (Basic & Platform stacks), follow-up messages land on random pods, missing the cache almost every time. <strong>The Cache-Aware stack</strong> routes each follow-up to the pod that already has that conversation\'s KV cache warm.'
+        why: 'Multi-turn chat has extremely high prefix overlap  --  every message reuses the system prompt and prior conversation. With round-robin routing (Basic & Platform stacks), follow-up messages land on random pods, missing the cache almost every time. <strong>The Cache-Aware stack</strong> routes each follow-up to the pod that already has that conversation\'s KV cache warm.'
       },
       {
         key: 'agentic',
@@ -350,7 +350,7 @@
         description: 'High-volume processing with unique prompts and minimal prefix overlap between requests.',
         ratings: { basic: 75, platform: 65, cacheaware: 50 },
         best: 'basic',
-        why: 'Batch processing with unique prompts has minimal prefix overlap, so cache-aware routing provides little benefit. <strong>The Basic stack\'s</strong> simplicity and low overhead actually wins here — round-robin distributes load evenly, and the runtime\'s continuous batching maximizes per-GPU throughput. No reason to pay for cache-aware routing overhead.'
+        why: 'Batch processing with unique prompts has minimal prefix overlap, so cache-aware routing provides little benefit. <strong>The Basic stack\'s</strong> simplicity and low overhead actually wins here  --  round-robin distributes load evenly, and the runtime\'s continuous batching maximizes per-GPU throughput. No reason to pay for cache-aware routing overhead.'
       }
     ],
 
@@ -359,7 +359,7 @@
         features: [
           { icon: '⚡', text: 'Simple round-robin distributes requests evenly across pods' },
           { icon: '💾', text: 'Each pod maintains its own local prefix cache (via vLLM/SGLang)' },
-          { icon: '🔧', text: 'Works anywhere — bare metal, VMs, or Kubernetes' },
+          { icon: '🔧', text: 'Works anywhere  --  bare metal, VMs, or Kubernetes' },
           { icon: '📊', text: 'Minimal operational complexity and routing overhead (<1ms)' }
         ],
         tradeoffs: 'Random routing means most requests miss the warm cache on multi-pod deployments. At 8 pods, only ~12.5% of follow-up requests hit the right cache.',
@@ -374,7 +374,7 @@
           { icon: '🔄', text: 'Canary and blue-green deployments for safe model rollouts' },
           { icon: '🏗️', text: 'Multi-model serving on shared infrastructure' }
         ],
-        tradeoffs: 'Adds Kubernetes dependency and operational complexity. Routing is still load-balanced — no cache awareness across pods.',
+        tradeoffs: 'Adds Kubernetes dependency and operational complexity. Routing is still load-balanced  --  no cache awareness across pods.',
         bestFor: ['Production Kubernetes clusters', 'Teams needing autoscaling', 'Multi-model deployments'],
         metrics: { ttft32k: '~3,500ms', cacheHit: '~1/N pods', overhead: '~5ms' }
       },
@@ -382,8 +382,8 @@
         features: [
           { icon: '🧠', text: 'llm-d EPP tracks KV cache state across all pods in real time' },
           { icon: '🎯', text: 'Routes requests to the pod with the warmest cache for that prefix' },
-          { icon: '⚡', text: 'Eliminates redundant GPU prefill — up to 47.5x faster TTFT at 32K context' },
-          { icon: '🔗', text: 'Built on KServe + Gateway API — all Platform stack benefits included' },
+          { icon: '⚡', text: 'Eliminates redundant GPU prefill  --  up to 47.5x faster TTFT at 32K context' },
+          { icon: '🔗', text: 'Built on KServe + Gateway API  --  all Platform stack benefits included' },
           { icon: '🌍', text: 'CNCF Sandbox project with active community governance' },
           { icon: '📡', text: 'Prefix-hash routing with load-aware fallback for optimal distribution' }
         ],
@@ -394,11 +394,11 @@
     },
 
     MATRIX_TOOLTIPS: {
-      'Local Prefix Caching (per pod)': 'Each runtime (vLLM/SGLang) caches KV tensors for recently-seen prefixes within a single pod. This is automatic — no extra infrastructure needed.',
+      'Local Prefix Caching (per pod)': 'Each runtime (vLLM/SGLang) caches KV tensors for recently-seen prefixes within a single pod. This is automatic  --  no extra infrastructure needed.',
       'Cross-Pod Cache Coordination': 'Tracking which pods have which prefixes cached, so the router can make informed decisions. Only llm-d EPP does this.',
       'Cache-Aware Request Routing': 'Routing incoming requests to the specific pod that already has the matching prefix in its KV cache, avoiding redundant GPU compute.',
       'Real-Time KV Cache Tracking': 'llm-d EPP continuously monitors the KV cache state of every pod, enabling informed routing decisions even as cache contents change.',
-      'Cold-Start Elimination': 'When a pod has the prefix cached, TTFT drops from seconds to milliseconds — the GPU skips prefill entirely and goes straight to generation.',
+      'Cold-Start Elimination': 'When a pod has the prefix cached, TTFT drops from seconds to milliseconds  --  the GPU skips prefill entirely and goes straight to generation.',
       'TTFT at 32K (avg with prefix reuse)': 'Average Time to First Token with 32K context length and high prefix overlap. Cache-aware routing eliminates the need to re-prefill the prompt.',
       'TTFT at 32K (lucky same-pod hit)': 'TTFT when a request happens to land on the pod with a warm cache by chance (round-robin) vs. by design (cache-aware).',
       'Routing Overhead': 'Additional latency added by the routing layer itself. All approaches add negligible overhead compared to GPU prefill time.',
@@ -409,7 +409,7 @@
       'Autoscaling': 'HPA = Horizontal Pod Autoscaler (CPU/memory-based). KPA = Knative Pod Autoscaler (concurrency/RPS-based, included with KServe).',
       'Canary / Blue-Green Deploys': 'Gradually rolling out a new model version alongside the existing one, routing a percentage of traffic to validate before full cutover.',
       'Multi-Model Serving': 'Running multiple models on the same infrastructure with shared GPU resources and independent scaling policies.',
-      'Production Readiness': 'Overall maturity for production workloads — covering monitoring, reliability, deployment patterns, and operational tooling.',
+      'Production Readiness': 'Overall maturity for production workloads  --  covering monitoring, reliability, deployment patterns, and operational tooling.',
       'Multi-Turn Chat': 'Conversations where each message reuses the system prompt + prior conversation as a prefix. Very high prefix overlap.',
       'Agentic / Tool Calling': 'LLM agents that make iterative tool calls, each building on the same growing context. Extremely high prefix reuse.',
       'RAG / Retrieval': 'Retrieval-augmented generation with shared system prompts and retrieval templates. High prefix overlap from the template.',
@@ -1010,8 +1010,8 @@
     var confColor = answered >= 3 ? 'var(--color-llmd-bright)' : (answered >= 2 ? '#c05621' : 'var(--color-text-muted)');
 
     var explanations = {
-      cacheaware: 'The Cache-Aware stack (vLLM/SGLang + KServe + llm-d EPP) routes requests to pods with warm KV caches. For workloads with high prefix overlap — chat, agentic, RAG — this eliminates redundant GPU compute and can reduce TTFT by up to 47.5x.',
-      platform: 'The Platform stack (vLLM/SGLang + KServe) gives you Kubernetes-native model serving with autoscaling, Gateway API, and canary deploys. Great operational foundation, but routing is still load-balanced — no cache awareness.',
+      cacheaware: 'The Cache-Aware stack (vLLM/SGLang + KServe + llm-d EPP) routes requests to pods with warm KV caches. For workloads with high prefix overlap  --  chat, agentic, RAG  --  this eliminates redundant GPU compute and can reduce TTFT by up to 47.5x.',
+      platform: 'The Platform stack (vLLM/SGLang + KServe) gives you Kubernetes-native model serving with autoscaling, Gateway API, and canary deploys. Great operational foundation, but routing is still load-balanced  --  no cache awareness.',
       basic: 'The Basic stack (vLLM/SGLang + round-robin LB) is the simplest deployment. Best for batch workloads with unique prompts where cache-aware routing adds no value, or for non-Kubernetes environments.'
     };
 

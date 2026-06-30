@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inference Routing Landscape — llm-d</title>
+  <title>Inference Routing Landscape  --  llm-d</title>
   <meta name="description" content="Interactive comparison of 3 LLM inference deployment stacks: Basic, Platform, and Cache-Aware routing with llm-d.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +40,7 @@
     <p class="hero-tagline reveal">Comparing deployment stacks for LLM inference routing</p>
     <h1 class="hero-title reveal reveal-delay-1">The Inference Routing<br>Landscape</h1>
     <p class="hero-description reveal reveal-delay-2">
-      Every LLM deployment combines a runtime, a routing strategy, and optionally a serving platform. Understand the three deployment stacks — and where cache-aware routing delivers a step-change in performance.
+      Every LLM deployment combines a runtime, a routing strategy, and optionally a serving platform. Understand the three deployment stacks  --  and where cache-aware routing delivers a step-change in performance.
     </p>
     <div class="hero-stats reveal reveal-delay-3">
       <div class="stat-card">
@@ -119,7 +119,7 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--rr" title="Distributes requests evenly across pods — no awareness of cache state">Round-Robin LB</div>
+          <div class="arch-node arch-node--rr" title="Distributes requests evenly across pods  --  no awareness of cache state">Round-Robin LB</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
             <div class="arch-node arch-node--pod" title="Each pod has local prefix caching, but routing is random">vLLM Pod 1</div>
@@ -136,12 +136,12 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API — standardized traffic management, TLS, and routing rules">Gateway API</div>
+          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API  --  standardized traffic management, TLS, and routing rules">Gateway API</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--kserve" title="KServe InferenceService — autoscaling, model lifecycle management, traffic splitting">KServe Router</div>
+          <div class="arch-node arch-node--kserve" title="KServe InferenceService  --  autoscaling, model lifecycle management, traffic splitting">KServe Router</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Same runtime, better ops — but routing is still load-balanced">vLLM Pod 1</div>
+            <div class="arch-node arch-node--pod" title="Same runtime, better ops  --  but routing is still load-balanced">vLLM Pod 1</div>
             <div class="arch-node arch-node--pod">vLLM Pod 2</div>
             <div class="arch-node arch-node--pod">vLLM Pod 3</div>
           </div>
@@ -155,14 +155,14 @@
         <div class="arch-stack">
           <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API — same as Platform stack">Gateway API</div>
+          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API  --  same as Platform stack">Gateway API</div>
           <div class="arch-connector"></div>
-          <div class="arch-node arch-node--llmd" title="llm-d Endpoint Picker Policy — hashes the prefix, checks which pod has it cached, routes there">llm-d EPP</div>
+          <div class="arch-node arch-node--llmd" title="llm-d Endpoint Picker Policy  --  hashes the prefix, checks which pod has it cached, routes there">llm-d EPP</div>
           <div class="arch-connector"></div>
           <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Pod 1 has the warmest cache — EPP routes matching requests here">vLLM Pod 1<br><span style="font-size:9px;opacity:0.7">KV Cache ████</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 2 has a partial cache — used for load balancing when Pod 1 is busy">vLLM Pod 2<br><span style="font-size:9px;opacity:0.7">KV Cache ██</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 3 has minimal cache — receives requests with new prefixes">vLLM Pod 3<br><span style="font-size:9px;opacity:0.7">KV Cache █</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 1 has the warmest cache  --  EPP routes matching requests here">vLLM Pod 1<br><span style="font-size:9px;opacity:0.7">KV Cache ████</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 2 has a partial cache  --  used for load balancing when Pod 1 is busy">vLLM Pod 2<br><span style="font-size:9px;opacity:0.7">KV Cache ██</span></div>
+            <div class="arch-node arch-node--pod" title="Pod 3 has minimal cache  --  receives requests with new prefixes">vLLM Pod 3<br><span style="font-size:9px;opacity:0.7">KV Cache █</span></div>
           </div>
         </div>
         <div class="arch-column-summary">Hover to see request flow</div>
@@ -171,7 +171,7 @@
     </div>
 
     <div class="arch-note reveal reveal-delay-4">
-      <strong>These stacks build on each other.</strong> The Cache-Aware stack uses KServe for deployment and vLLM/SGLang as the runtime — it adds llm-d's Endpoint Picker Policy (EPP) for cache-aware request routing on top of production infrastructure.
+      <strong>These stacks build on each other.</strong> The Cache-Aware stack uses KServe for deployment and vLLM/SGLang as the runtime  --  it adds llm-d's Endpoint Picker Policy (EPP) for cache-aware request routing on top of production infrastructure.
     </div>
 
   </div>
@@ -183,7 +183,7 @@
 <section class="performance" id="performance">
   <div class="container">
     <h2 class="section-title reveal">TTFT Performance by Context Length</h2>
-    <p class="section-description reveal reveal-delay-1">Time to First Token (TTFT) measured on H200 GPUs with Llama 3.1 70B. All stacks use vLLM — the only difference is routing strategy.</p>
+    <p class="section-description reveal reveal-delay-1">Time to First Token (TTFT) measured on H200 GPUs with Llama 3.1 70B. All stacks use vLLM  --  the only difference is routing strategy.</p>
     <div class="perf-chart-wrapper reveal reveal-delay-2">
       <div class="perf-chart-container" id="perfChart">
         <!-- JS renders SVG chart -->
@@ -206,7 +206,7 @@
 <section class="scenarios" id="scenarios">
   <div class="container">
     <h2 class="section-title reveal">Scenario Explorer</h2>
-    <p class="section-description reveal reveal-delay-1">Different workloads favor different stacks. Explore which one wins — and why — for your use case.</p>
+    <p class="section-description reveal reveal-delay-1">Different workloads favor different stacks. Explore which one wins  --  and why  --  for your use case.</p>
     <div class="scenario-tabs reveal reveal-delay-2" id="scenarioTabs">
       <!-- JS renders tabs -->
     </div>
@@ -253,21 +253,21 @@
       <details class="method-item">
         <summary>Stack-Based Comparison</summary>
         <div class="method-item-body">
-          <p>This comparison evaluates three deployment stacks, not individual products. Every stack uses the same runtime (vLLM or SGLang) — the difference is the routing and deployment layer. The Basic stack uses simple round-robin. The Platform stack adds KServe for Kubernetes-native operations. The Cache-Aware stack adds llm-d's EPP for KV-cache-aware routing.</p>
+          <p>This comparison evaluates three deployment stacks, not individual products. Every stack uses the same runtime (vLLM or SGLang)  --  the difference is the routing and deployment layer. The Basic stack uses simple round-robin. The Platform stack adds KServe for Kubernetes-native operations. The Cache-Aware stack adds llm-d's EPP for KV-cache-aware routing.</p>
         </div>
       </details>
 
       <details class="method-item">
         <summary>Cache Savings Estimates</summary>
         <div class="method-item-body">
-          <p>Cache-aware savings come from routing requests to pods with warm KV caches. At 32K context with high prefix overlap, llm-d's EPP achieves up to 47.5x TTFT reduction vs round-robin. Savings vary by workload: multi-turn chat sees ~40x, RAG ~35x, agentic ~30x. Batch processing with unique prompts shows minimal cache benefit — round-robin may actually be preferable.</p>
+          <p>Cache-aware savings come from routing requests to pods with warm KV caches. At 32K context with high prefix overlap, llm-d's EPP achieves up to 47.5x TTFT reduction vs round-robin. Savings vary by workload: multi-turn chat sees ~40x, RAG ~35x, agentic ~30x. Batch processing with unique prompts shows minimal cache benefit  --  round-robin may actually be preferable.</p>
         </div>
       </details>
 
       <details class="method-item">
         <summary>Data Sources &amp; Limitations</summary>
         <div class="method-item-body">
-          <p>Data sources include llm-d project benchmarks, vLLM/SGLang documentation, KServe architecture docs, and CNCF project materials. Limitations: local prefix caching within a pod (provided by the runtime) is present in all three stacks — the cache-aware advantage comes from cross-pod coordination. Real-world results depend on hardware, model size, prompt patterns, and cluster configuration.</p>
+          <p>Data sources include llm-d project benchmarks, vLLM/SGLang documentation, KServe architecture docs, and CNCF project materials. Limitations: local prefix caching within a pod (provided by the runtime) is present in all three stacks  --  the cache-aware advantage comes from cross-pod coordination. Real-world results depend on hardware, model size, prompt patterns, and cluster configuration.</p>
         </div>
       </details>
 
@@ -278,7 +278,7 @@
 <!-- Footer -->
 <footer class="site-footer">
   <div class="container">
-    <div class="footer-brand">llm-d — CNCF Sandbox Project</div>
+    <div class="footer-brand">llm-d  --  CNCF Sandbox Project</div>
     <div class="footer-links">
       <a href="https://github.com/llm-d" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.cncf.io/projects/llm-d/" target="_blank" rel="noopener">CNCF</a>

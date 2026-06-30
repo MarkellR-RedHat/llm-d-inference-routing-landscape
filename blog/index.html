@@ -51,7 +51,7 @@
 
 <div class="submission-header">
   <h1>The Inference Routing Landscape: How to Choose</h1>
-  <div class="subtitle">Round-robin, load-aware, hash-based, or cache-aware — which routing approach fits your workload</div>
+  <div class="subtitle">Round-robin, load-aware, hash-based, or cache-aware  --  which routing approach fits your workload</div>
 </div>
 
 <div class="meta-card">
@@ -65,7 +65,7 @@
 <div class="article">
 <h2>The Routing Decision Nobody Talks About</h2>
 
-<p>Every enterprise deploying LLMs makes a routing decision &mdash; whether they realize it or not. A basic load balancer in front of vLLM replicas is a routing decision. A managed API gateway is a routing decision. Each one carries trade-offs in cost, latency, vendor lock-in, and operational flexibility that compound at scale.</p>
+<p>Every enterprise deploying LLMs makes a routing decision  --  whether they realize it or not. A basic load balancer in front of vLLM replicas is a routing decision. A managed API gateway is a routing decision. Each one carries trade-offs in cost, latency, vendor lock-in, and operational flexibility that compound at scale.</p>
 
 <p>This post maps the inference routing landscape: what approaches exist, where each one wins, and how to choose based on your workload.</p>
 
@@ -121,14 +121,14 @@
 <p>llm-d runs on any Kubernetes cluster, any GPU vendor (NVIDIA, AMD, Intel), and any vLLM-supported model. The routing logic is decoupled from the infrastructure.</p>
 
 <h3>Hardware flexibility</h3>
-<p>As GPU generations evolve and new accelerators emerge (NVIDIA B200, AMD MI325X, Intel Gaudi 3), your routing layer shouldn&rsquo;t be tied to one vendor&rsquo;s SDK. llm-d uses standard Kubernetes primitives &mdash; pods, services, endpoints &mdash; that work across any hardware.</p>
+<p>As GPU generations evolve and new accelerators emerge (NVIDIA B200, AMD MI325X, Intel Gaudi 3), your routing layer shouldn&rsquo;t be tied to one vendor&rsquo;s SDK. llm-d uses standard Kubernetes primitives  --  pods, services, endpoints  --  that work across any hardware.</p>
 
 <h2>The Business View</h2>
 
 <p>For decision-makers who need the summary:</p>
 
 <div class="callout callout-red">
-  <strong>The question isn&rsquo;t &ldquo;which routing is fastest?&rdquo;</strong> It&rsquo;s &ldquo;which routing approach lets us scale without locking us in, works across GPU vendors, and has a community behind it?&rdquo; Speed is table stakes &mdash; llm-d delivers 47.5x TTFT improvement. The strategic advantage is what comes with it.
+  <strong>The question isn&rsquo;t &ldquo;which routing is fastest?&rdquo;</strong> It&rsquo;s &ldquo;which routing approach lets us scale without locking us in, works across GPU vendors, and has a community behind it?&rdquo; Speed is table stakes  --  llm-d delivers 47.5x TTFT improvement. The strategic advantage is what comes with it.
 </div>
 
 <h2>How to Choose</h2>
