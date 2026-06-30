@@ -1,342 +1,1663 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inference Routing Landscape  --  llm-d</title>
-  <meta name="description" content="Interactive comparison of 3 LLM inference deployment stacks: Basic, Platform, and Cache-Aware routing with llm-d.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Inference Routing Landscape -- llm-d</title>
+<meta name="description" content="Interactive slide deck comparing LLM inference routing strategies: round-robin, load-aware, hash-based, and cache-aware routing with llm-d.">
+<meta name="author" content="Markell Rawls">
+<link rel="icon" href="https://llm-d.ai/img/llm-d-icon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800;900&family=Red+Hat+Text:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ======================================================================
+   RESET & BASE
+   ====================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Red Hat Text', 'Segoe UI', system-ui, sans-serif;
+  color: #2d2a26;
+  background: #faf8f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection { background: rgba(61,154,106,0.2); color: #2d2a26; }
+
+/* ======================================================================
+   FLOWING GRADIENT BACKGROUND
+   ====================================================================== */
+.bg-gradient {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(135deg,
+    #faf8f5 0%, #fdf6ec 15%, #f5f0e8 30%,
+    #eef3ed 50%, #f0f2f8 70%, #fdf8f0 85%, #faf8f5 100%
+  );
+  background-size: 400% 400%;
+  animation: bgFlow 30s ease-in-out infinite;
+}
+@keyframes bgFlow {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating orbs */
+.bg-gradient::before, .bg-gradient::after {
+  content: ''; position: absolute; border-radius: 50%;
+  filter: blur(80px); pointer-events: none;
+}
+.bg-gradient::before {
+  width: 600px; height: 600px; top: -200px; right: -150px;
+  background: radial-gradient(circle, rgba(61,154,106,0.08), transparent 70%);
+  animation: orbFloat 18s ease-in-out infinite;
+}
+.bg-gradient::after {
+  width: 500px; height: 500px; bottom: -150px; left: -100px;
+  background: radial-gradient(circle, rgba(74,127,181,0.07), transparent 70%);
+  animation: orbFloat 22s ease-in-out infinite -8s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-30px,25px) scale(1.08); }
+}
+
+/* ======================================================================
+   SLIDE STRUCTURE
+   ====================================================================== */
+.slides-viewport {
+  position: relative; z-index: 1;
+  width: 100%; height: 100vh;
+  overflow: hidden;
+}
+.slides-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.slide-inner {
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* ======================================================================
+   PROGRESS BAR
+   ====================================================================== */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 4px; z-index: 100;
+  background: linear-gradient(90deg, #c4573a, #4a7fb5, #2e7d52);
+  transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ======================================================================
+   NAVIGATION
+   ====================================================================== */
+.nav-arrows {
+  position: fixed; bottom: 40px; right: 40px; z-index: 100;
+  display: flex; gap: 10px;
+}
+.nav-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(45,42,38,0.15);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+  color: #2d2a26;
+}
+.nav-btn:hover {
+  background: #2e7d52; color: #fff;
+  border-color: #2e7d52;
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(46,125,82,0.25);
+}
+.nav-btn:disabled {
+  opacity: 0.3; cursor: not-allowed;
+  transform: none; background: rgba(255,255,255,0.5);
+}
+.nav-btn:disabled:hover {
+  background: rgba(255,255,255,0.5); color: #2d2a26;
+  border-color: rgba(45,42,38,0.15); box-shadow: none;
+}
+.nav-btn svg { width: 20px; height: 20px; }
+
+/* Dots */
+.nav-dots {
+  position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%);
+  z-index: 100; display: flex; gap: 10px;
+}
+.nav-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(45,42,38,0.15);
+  border: none; cursor: pointer;
+  transition: all 0.35s ease;
+}
+.nav-dot.active {
+  background: #2e7d52;
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(46,125,82,0.3);
+}
+.nav-dot:hover:not(.active) {
+  background: rgba(45,42,38,0.35);
+  transform: scale(1.15);
+}
+
+/* Slide counter */
+.slide-counter {
+  position: fixed; bottom: 46px; left: 40px; z-index: 100;
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 1px;
+  color: rgba(45,42,38,0.35);
+}
+
+/* ======================================================================
+   TYPOGRAPHY
+   ====================================================================== */
+h1, h2, h3, h4 {
+  font-family: 'Red Hat Display', sans-serif;
+  line-height: 1.2; color: #2d2a26;
+}
+.slide-tagline {
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: #2e7d52; margin-bottom: 16px;
+}
+.slide-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800; letter-spacing: -0.5px;
+  margin-bottom: 20px; line-height: 1.1;
+}
+.slide-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  color: #5c5850; line-height: 1.7;
+  max-width: 700px; font-weight: 400;
+}
+
+/* ======================================================================
+   ENTRANCE ANIMATIONS
+   ====================================================================== */
+.anim-in {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+              transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.active .anim-in { opacity: 1; transform: translateY(0); }
+.anim-d1 { transition-delay: 0.1s; }
+.anim-d2 { transition-delay: 0.2s; }
+.anim-d3 { transition-delay: 0.35s; }
+.anim-d4 { transition-delay: 0.5s; }
+.anim-d5 { transition-delay: 0.65s; }
+.anim-d6 { transition-delay: 0.8s; }
+.anim-d7 { transition-delay: 0.95s; }
+
+/* Scale entrance */
+.anim-scale {
+  opacity: 0; transform: scale(0.85);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.active .anim-scale { opacity: 1; transform: scale(1); }
+
+/* Fade left */
+.anim-left {
+  opacity: 0; transform: translateX(-40px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.active .anim-left { opacity: 1; transform: translateX(0); }
+
+/* Fade right */
+.anim-right {
+  opacity: 0; transform: translateX(40px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.active .anim-right { opacity: 1; transform: translateX(0); }
+
+/* ======================================================================
+   STAT CARDS
+   ====================================================================== */
+.stats-row {
+  display: flex; gap: 24px; margin-top: 40px; flex-wrap: wrap;
+}
+.stat-card {
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  border-radius: 16px;
+  padding: 28px 32px;
+  flex: 1; min-width: 180px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(139,119,90,0.06);
+  position: relative; overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #2e7d52, #4a7fb5);
+  opacity: 0.5; transition: opacity 0.3s ease;
+}
+.stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 30px rgba(139,119,90,0.12);
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-value {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 2.2rem; font-weight: 800;
+  color: #2e7d52; line-height: 1;
+}
+.stat-label {
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #8a8477; margin-top: 8px;
+}
+
+/* ======================================================================
+   APPROACH CARDS (Slide 2 & 3)
+   ====================================================================== */
+.approach-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px; margin-top: 32px;
+}
+.approach-card {
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(139,119,90,0.06);
+  transition: all 0.35s ease;
+}
+.approach-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  transition: height 0.3s ease;
+}
+.approach-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 36px rgba(139,119,90,0.12);
+}
+.approach-card:hover::before { height: 5px; }
+
+.approach-card--rr::before { background: #c4573a; }
+.approach-card--la::before { background: #b5793a; }
+.approach-card--hash::before { background: #4a7fb5; }
+.approach-card--cache::before { background: #2e7d52; }
+
+.approach-name {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 1.05rem; font-weight: 700;
+  margin-bottom: 10px;
+}
+.approach-card--rr .approach-name { color: #c4573a; }
+.approach-card--la .approach-name { color: #b5793a; }
+.approach-card--hash .approach-name { color: #4a7fb5; }
+.approach-card--cache .approach-name { color: #2e7d52; }
+
+.approach-desc {
+  font-size: 14px; color: #5c5850;
+  line-height: 1.65; margin-bottom: 14px;
+}
+.approach-verdict {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 12px; border-radius: 20px;
+  display: inline-block;
+}
+.verdict--weak { background: rgba(196,87,58,0.08); color: #c4573a; }
+.verdict--mid { background: rgba(74,127,181,0.08); color: #4a7fb5; }
+.verdict--strong { background: rgba(46,125,82,0.08); color: #2e7d52; }
+
+/* ======================================================================
+   ARCHITECTURE COMPARISON (Slide 4)
+   ====================================================================== */
+.arch-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px; margin-top: 28px;
+}
+.arch-col {
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(139,119,90,0.06);
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.arch-col:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(139,119,90,0.1);
+}
+.arch-col--basic { border-top: 4px solid #c4573a; }
+.arch-col--platform { border-top: 4px solid #4a7fb5; }
+.arch-col--llmd { border-top: 4px solid #2e7d52; }
+
+.arch-col-label {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  text-align: center; margin-bottom: 18px;
+}
+.arch-col--basic .arch-col-label { color: #c4573a; }
+.arch-col--platform .arch-col-label { color: #4a7fb5; }
+.arch-col--llmd .arch-col-label { color: #2e7d52; }
+
+.arch-node {
+  width: 100%; padding: 10px 14px;
+  border-radius: 8px; text-align: center;
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease;
+}
+.arch-node:hover { transform: scale(1.03); }
+.arch-node--client { background: #faf8f5; border: 1px solid #e8e2d9; color: #5c5850; }
+.arch-node--rr { background: rgba(196,87,58,0.08); border: 1px solid rgba(196,87,58,0.25); color: #c4573a; }
+.arch-node--gateway { background: rgba(74,127,181,0.08); border: 1px solid rgba(74,127,181,0.25); color: #4a7fb5; }
+.arch-node--kserve { background: rgba(74,127,181,0.08); border: 1px solid rgba(74,127,181,0.25); color: #4a7fb5; }
+.arch-node--epp { background: rgba(46,125,82,0.08); border: 1px solid rgba(46,125,82,0.25); color: #2e7d52; }
+.arch-node--pod { background: rgba(181,121,58,0.06); border: 1px solid rgba(181,121,58,0.2); color: #b5793a; font-size: 11px; }
+
+.arch-connector {
+  width: 2px; height: 12px;
+  background: #e8e2d9;
+  margin: 0 auto 8px;
+  position: relative;
+}
+.arch-pods {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.arch-note-text {
+  font-size: 11px; color: #8a8477;
+  text-align: center; margin-top: 12px;
+  font-weight: 500; font-style: italic;
+}
+
+/* ======================================================================
+   CANVAS CONTAINER (Slide 5)
+   ====================================================================== */
+.canvas-container {
+  position: relative;
+  width: 100%; height: 420px;
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(139,119,90,0.06);
+  overflow: hidden; margin-top: 28px;
+}
+.canvas-container canvas {
+  width: 100%; height: 100%;
+}
+.canvas-legend {
+  position: absolute; bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 24px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  padding: 8px 20px; border-radius: 20px;
+  border: 1px solid rgba(232,226,217,0.6);
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: #5c5850;
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.perf-annotation-box {
+  position: absolute; right: 28px; top: 28px;
+  background: rgba(46,125,82,0.06);
+  border: 1px solid rgba(46,125,82,0.2);
+  border-radius: 12px;
+  padding: 12px 20px; text-align: center;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.6s ease 1.8s;
+}
+.perf-annotation-box.visible { opacity: 1; transform: translateY(0); }
+.perf-annotation-val {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 2rem; font-weight: 800; color: #2e7d52;
+}
+.perf-annotation-lbl {
+  font-size: 11px; font-weight: 600;
+  color: #5c5850; letter-spacing: 0.3px;
+}
+
+/* ======================================================================
+   COMPARISON TABLE (Slide 5)
+   ====================================================================== */
+.comparison-table {
+  width: 100%; border-collapse: collapse;
+  margin-top: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(139,119,90,0.06);
+}
+.comparison-table th, .comparison-table td {
+  padding: 14px 18px;
+  text-align: center;
+  border-bottom: 1px solid rgba(232,226,217,0.6);
+  font-size: 13px;
+}
+.comparison-table th {
+  background: #faf8f5;
+  font-family: 'Red Hat Display', sans-serif;
+  font-weight: 700; font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #5c5850;
+}
+.comparison-table th:first-child { text-align: left; }
+.comparison-table td:first-child {
+  text-align: left; font-weight: 600;
+  color: #2d2a26;
+}
+.comparison-table tbody tr {
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s ease;
+}
+.slide.active .comparison-table tbody tr { opacity: 1; transform: translateX(0); }
+.comparison-table tbody tr:hover { background: rgba(46,125,82,0.03); }
+.tbl-badge {
+  display: inline-block;
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 700;
+}
+.tbl-badge--green { background: rgba(46,125,82,0.1); color: #2e7d52; }
+.tbl-badge--red { background: rgba(196,87,58,0.08); color: #c4573a; }
+.tbl-badge--blue { background: rgba(74,127,181,0.08); color: #4a7fb5; }
+.tbl-check { color: #2e7d52; font-weight: 700; }
+.tbl-cross { color: #c4573a; font-weight: 700; }
+
+/* ======================================================================
+   VERDICT COLUMNS (Slide 7)
+   ====================================================================== */
+.verdict-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px; margin-top: 32px;
+}
+.verdict-col {
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid rgba(232,226,217,0.8);
+}
+.verdict-col--yes {
+  background: rgba(46,125,82,0.04);
+  border-color: rgba(46,125,82,0.2);
+}
+.verdict-col--no {
+  background: rgba(196,87,58,0.04);
+  border-color: rgba(196,87,58,0.2);
+}
+.verdict-col-title {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(232,226,217,0.8);
+}
+.verdict-col--yes .verdict-col-title { color: #2e7d52; }
+.verdict-col--no .verdict-col-title { color: #c4573a; }
+.verdict-list { list-style: none; }
+.verdict-list li {
+  font-size: 14px; color: #5c5850;
+  line-height: 1.6; padding: 6px 0 6px 20px;
+  position: relative;
+}
+.verdict-list li::before {
+  content: ''; position: absolute;
+  left: 0; top: 14px;
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.verdict-col--yes .verdict-list li::before { background: #2e7d52; }
+.verdict-col--no .verdict-list li::before { background: #c4573a; }
+
+/* ======================================================================
+   SCENARIO PILLS (Slide 6)
+   ====================================================================== */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px; margin-top: 28px;
+}
+.scenario-card {
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(139,119,90,0.06);
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.scenario-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(139,119,90,0.1);
+}
+.scenario-card-title {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #2d2a26; margin-bottom: 12px;
+}
+.scenario-bar-row {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 8px;
+}
+.scenario-bar-name {
+  font-size: 11px; font-weight: 600; color: #8a8477;
+  min-width: 70px;
+}
+.scenario-bar-track {
+  flex: 1; height: 8px;
+  background: rgba(232,226,217,0.5);
+  border-radius: 4px; overflow: hidden;
+}
+.scenario-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  width: 0;
+}
+.slide.active .scenario-bar-fill { /* width set inline */ }
+.scenario-bar-val {
+  font-size: 11px; font-weight: 700;
+  min-width: 28px; text-align: right;
+}
+.scenario-card-winner {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 12px;
+  margin-top: 8px;
+  background: rgba(46,125,82,0.08); color: #2e7d52;
+}
+
+/* ======================================================================
+   FOOTER SLIDE
+   ====================================================================== */
+.cta-links {
+  display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap;
+}
+.cta-btn {
+  font-family: 'Red Hat Text', sans-serif;
+  font-size: 15px; font-weight: 700;
+  padding: 14px 32px; border-radius: 30px;
+  text-decoration: none; display: inline-flex;
+  align-items: center; gap: 8px;
+  transition: all 0.3s ease;
+}
+.cta-btn--primary {
+  background: #2e7d52; color: #fff;
+  box-shadow: 0 4px 16px rgba(46,125,82,0.25);
+}
+.cta-btn--primary:hover {
+  background: #3d9a6a; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(46,125,82,0.3);
+}
+.cta-btn--outline {
+  background: transparent; color: #2d2a26;
+  border: 2px solid rgba(45,42,38,0.15);
+}
+.cta-btn--outline:hover {
+  border-color: #2e7d52; color: #2e7d52;
+  transform: translateY(-2px);
+}
+.footer-meta {
+  margin-top: 40px;
+  font-size: 13px; color: #8a8477;
+  line-height: 1.8;
+}
+.footer-meta a { color: #4a7fb5; text-decoration: none; }
+.footer-meta a:hover { text-decoration: underline; }
+
+/* ======================================================================
+   CANVAS ANIMATION FOR ROUTING FLOWS (Slide 3)
+   ====================================================================== */
+.routing-canvas-wrap {
+  position: relative;
+  width: 100%; height: 340px;
+  margin-top: 20px;
+}
+.routing-canvas-wrap canvas {
+  width: 100%; height: 100%;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(232,226,217,0.8);
+  box-shadow: 0 4px 16px rgba(139,119,90,0.06);
+}
+
+/* ======================================================================
+   TWO-COL LAYOUT
+   ====================================================================== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px; align-items: center;
+}
+
+/* ======================================================================
+   RESPONSIVE
+   ====================================================================== */
+@media (max-width: 1024px) {
+  .slide { padding: 40px 32px; }
+  .approach-grid { grid-template-columns: repeat(2, 1fr); }
+  .arch-row { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .verdict-grid { grid-template-columns: 1fr; }
+  .scenario-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .slide { padding: 30px 20px; }
+  .stats-row { flex-direction: column; }
+  .approach-grid { grid-template-columns: 1fr; }
+  .nav-arrows { bottom: 20px; right: 20px; }
+  .nav-dots { bottom: 24px; }
+}
+</style>
 </head>
 <body>
 
-<!-- Background gradient flow -->
-<div class="bg-gradient-flow"></div>
+<!-- Background -->
+<div class="bg-gradient"></div>
 
-<!-- Scroll Progress -->
-<div class="scroll-progress" id="scrollProgress"></div>
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
 
-<!-- Header -->
-<header class="site-header">
-  <div class="header-inner">
-    <div class="header-brand">
-      <svg class="header-logo" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#276749"/><path d="M8 22V10l8 6-8 6z" fill="#fff" opacity=".9"/><path d="M16 22V10l8 6-8 6z" fill="#fff" opacity=".5"/></svg>
-      <span class="header-title">llm-d</span>
-      <span class="header-subtitle">Inference Routing Landscape</span>
+<!-- ======================================================================
+     SLIDES
+     ====================================================================== -->
+<div class="slides-viewport">
+<div class="slides-track" id="slidesTrack">
+
+<!-- ===== SLIDE 1: TITLE ===== -->
+<div class="slide" id="slide-0">
+<div class="slide-inner" style="text-align:center;">
+  <div class="anim-in anim-d1 slide-tagline">llm-d -- CNCF Sandbox Project</div>
+  <h1 class="anim-in anim-d2 slide-title" style="max-width:900px;margin:0 auto 20px;">
+    The Inference Routing<br>Landscape
+  </h1>
+  <p class="anim-in anim-d3 slide-subtitle" style="margin:0 auto 0;">
+    Every LLM deployment makes a routing decision -- whether you realize it or not.
+    This is the story of four approaches, from simple round-robin to cache-aware intelligence,
+    and where each one shines.
+  </p>
+  <div class="stats-row anim-in anim-d4" style="justify-content:center;">
+    <div class="stat-card">
+      <div class="stat-value" data-count="4">0</div>
+      <div class="stat-label">Routing Approaches</div>
     </div>
-    <div class="header-actions">
-      <a href="https://github.com/llm-d" class="btn-outline" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-      </a>
-      <a href="https://www.cncf.io/projects/llm-d/" class="btn-outline" target="_blank" rel="noopener">CNCF</a>
+    <div class="stat-card">
+      <div class="stat-value" data-count="47.5" data-suffix="x">0</div>
+      <div class="stat-label">Max TTFT Speedup</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.6rem;">CNCF</div>
+      <div class="stat-label">Sandbox Project</div>
     </div>
   </div>
-</header>
+</div>
+</div>
 
-<!-- ═══════════════════════════════════════════════════ CHAPTER 1: THE LANDSCAPE ═══ -->
-<section class="hero" id="chapter-landscape">
-  <div class="container">
-    <div class="chapter-marker reveal">
-      <span class="chapter-number">Chapter One</span>
-      <span class="chapter-line"></span>
+<!-- ===== SLIDE 2: THE FOUR APPROACHES ===== -->
+<div class="slide" id="slide-1">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter One</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">The Routing Approaches</h2>
+  <p class="anim-in anim-d3 slide-subtitle" style="margin-bottom:12px;">
+    The runtime (vLLM, SGLang) is an orthogonal choice. The difference is how requests find their way to pods.
+  </p>
+  <div class="approach-grid">
+    <div class="approach-card approach-card--rr anim-in anim-d3">
+      <div class="approach-name">Round-Robin</div>
+      <div class="approach-desc">Requests distributed evenly, no awareness of cache state or load. Every request is a cold prefill.</div>
+      <span class="approach-verdict verdict--weak">Cache-Blind</span>
     </div>
-    <p class="hero-tagline reveal reveal-delay-1">Comparing deployment stacks for LLM inference routing</p>
-    <h1 class="hero-title reveal reveal-delay-2">The Inference Routing<br>Landscape</h1>
-    <p class="hero-description reveal reveal-delay-3">
-      Every LLM deployment combines a runtime, a routing strategy, and optionally a serving platform. This is the story of three deployment stacks -- from simple round-robin to cache-aware intelligence -- and where each one shines.
+    <div class="approach-card approach-card--la anim-in anim-d4">
+      <div class="approach-name">Load-Aware</div>
+      <div class="approach-desc">Routes to least-busy replica. Prevents hotspots, but still ignores KV cache state entirely.</div>
+      <span class="approach-verdict verdict--weak">Cache-Blind</span>
+    </div>
+    <div class="approach-card approach-card--hash anim-in anim-d5">
+      <div class="approach-name">Hash-Based</div>
+      <div class="approach-desc">Hashes prefix for deterministic affinity. Rigid -- breaks with scaling, eviction, variable lengths.</div>
+      <span class="approach-verdict verdict--mid">Partial Affinity</span>
+    </div>
+    <div class="approach-card approach-card--cache anim-in anim-d6">
+      <div class="approach-name">Cache-Aware (llm-d)</div>
+      <div class="approach-desc">Tracks actual KV cache state in real time. Routes to the pod with the warmest cache, balanced against load.</div>
+      <span class="approach-verdict verdict--strong">Full Cache Intelligence</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 3: ROUTING FLOW ANIMATION ===== -->
+<div class="slide" id="slide-2">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter Two</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">How Requests Flow</h2>
+  <p class="anim-in anim-d3 slide-subtitle">
+    Watch three request flows side by side. Round-robin scatters requests randomly.
+    Cache-aware routing sends them to the pod with the warmest KV cache.
+  </p>
+  <div class="routing-canvas-wrap anim-in anim-d4">
+    <canvas id="routingCanvas"></canvas>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 4: THREE DEPLOYMENT STACKS ===== -->
+<div class="slide" id="slide-3">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter Three</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">Three Deployment Stacks</h2>
+  <p class="anim-in anim-d3 slide-subtitle" style="margin-bottom:4px;">
+    Each stack builds on the one before it. The Cache-Aware stack adds llm-d's EPP on top of KServe.
+  </p>
+  <div class="arch-row">
+    <!-- Basic -->
+    <div class="arch-col arch-col--basic anim-left anim-d3">
+      <div class="arch-col-label">Basic Stack</div>
+      <div class="arch-node arch-node--client">Client Request</div>
+      <div class="arch-connector"></div>
+      <div class="arch-node arch-node--rr">Round-Robin LB</div>
+      <div class="arch-connector"></div>
+      <div class="arch-pods">
+        <div class="arch-node arch-node--pod">Pod 1</div>
+        <div class="arch-node arch-node--pod">Pod 2</div>
+        <div class="arch-node arch-node--pod">Pod 3</div>
+      </div>
+      <div class="arch-note-text">Cache hit: ~1/N pods</div>
+    </div>
+    <!-- Platform -->
+    <div class="arch-col arch-col--platform anim-scale anim-d4">
+      <div class="arch-col-label">Platform Stack</div>
+      <div class="arch-node arch-node--client">Client Request</div>
+      <div class="arch-connector"></div>
+      <div class="arch-node arch-node--gateway">Gateway API</div>
+      <div class="arch-connector"></div>
+      <div class="arch-node arch-node--kserve">KServe Router</div>
+      <div class="arch-connector"></div>
+      <div class="arch-pods">
+        <div class="arch-node arch-node--pod">Pod 1</div>
+        <div class="arch-node arch-node--pod">Pod 2</div>
+        <div class="arch-node arch-node--pod">Pod 3</div>
+      </div>
+      <div class="arch-note-text">Better ops, same cache miss</div>
+    </div>
+    <!-- Cache-Aware -->
+    <div class="arch-col arch-col--llmd anim-right anim-d5">
+      <div class="arch-col-label">Cache-Aware Stack</div>
+      <div class="arch-node arch-node--client">Client Request</div>
+      <div class="arch-connector"></div>
+      <div class="arch-node arch-node--gateway">Gateway API</div>
+      <div class="arch-connector"></div>
+      <div class="arch-node arch-node--epp">llm-d EPP</div>
+      <div class="arch-connector"></div>
+      <div class="arch-pods">
+        <div class="arch-node arch-node--pod">Pod 1 &#9608;&#9608;&#9608;&#9608;</div>
+        <div class="arch-node arch-node--pod">Pod 2 &#9608;&#9608;</div>
+        <div class="arch-node arch-node--pod">Pod 3 &#9608;</div>
+      </div>
+      <div class="arch-note-text">Cache hit: ~95%</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 5: PERFORMANCE CHART ===== -->
+<div class="slide" id="slide-4">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter Four</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">The Performance Gap</h2>
+  <p class="anim-in anim-d3 slide-subtitle">
+    TTFT measured on H200 GPUs with Llama 3.1 70B. Same runtime (vLLM) -- only the routing changes.
+  </p>
+  <div class="canvas-container anim-in anim-d4">
+    <canvas id="perfCanvas"></canvas>
+    <div class="canvas-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#c4573a;"></span> Basic / Platform</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2e7d52;"></span> Cache-Aware (llm-d)</div>
+    </div>
+    <div class="perf-annotation-box" id="perfAnnotation">
+      <div class="perf-annotation-val">47.5x</div>
+      <div class="perf-annotation-lbl">faster TTFT at 32K tokens</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 6: SCENARIO COMPARISON ===== -->
+<div class="slide" id="slide-5">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter Five</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">Which Workload Wins Where?</h2>
+  <p class="anim-in anim-d3 slide-subtitle">
+    Different workloads favor different routing. Cache-aware routing dominates when prefix overlap is high.
+  </p>
+  <div class="scenario-grid">
+    <!-- Chat -->
+    <div class="scenario-card anim-in anim-d3">
+      <div class="scenario-card-title">Multi-Turn Chat</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="20%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">20</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="30%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">30</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="95%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">95</span>
+      </div>
+      <div class="scenario-card-winner">Best: Cache-Aware</div>
+    </div>
+    <!-- Agentic -->
+    <div class="scenario-card anim-in anim-d4">
+      <div class="scenario-card-title">Agentic / Tool Use</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="15%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">15</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="25%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">25</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="95%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">95</span>
+      </div>
+      <div class="scenario-card-winner">Best: Cache-Aware</div>
+    </div>
+    <!-- RAG -->
+    <div class="scenario-card anim-in anim-d5">
+      <div class="scenario-card-title">RAG / Retrieval</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="20%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">20</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="30%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">30</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="90%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">90</span>
+      </div>
+      <div class="scenario-card-winner">Best: Cache-Aware</div>
+    </div>
+    <!-- Code -->
+    <div class="scenario-card anim-in anim-d5">
+      <div class="scenario-card-title">Code Generation</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="25%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">25</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="35%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">35</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="85%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">85</span>
+      </div>
+      <div class="scenario-card-winner">Best: Cache-Aware</div>
+    </div>
+    <!-- Batch -->
+    <div class="scenario-card anim-in anim-d6">
+      <div class="scenario-card-title">Batch Processing</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="75%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">75</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="65%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">65</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="50%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">50</span>
+      </div>
+      <div class="scenario-card-winner" style="background:rgba(196,87,58,0.08);color:#c4573a;">Best: Basic Stack</div>
+    </div>
+    <!-- Structured -->
+    <div class="scenario-card anim-in anim-d7">
+      <div class="scenario-card-title">Structured Output</div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#c4573a;">Basic</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#c4573a;" data-width="40%"></div></div>
+        <span class="scenario-bar-val" style="color:#c4573a;">40</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#4a7fb5;">Platform</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#4a7fb5;" data-width="45%"></div></div>
+        <span class="scenario-bar-val" style="color:#4a7fb5;">45</span>
+      </div>
+      <div class="scenario-bar-row">
+        <span class="scenario-bar-name" style="color:#2e7d52;">Cache-Aware</span>
+        <div class="scenario-bar-track"><div class="scenario-bar-fill" style="background:#2e7d52;" data-width="80%"></div></div>
+        <span class="scenario-bar-val" style="color:#2e7d52;">80</span>
+      </div>
+      <div class="scenario-card-winner">Best: Cache-Aware</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 7: THE VERDICT ===== -->
+<div class="slide" id="slide-6">
+<div class="slide-inner">
+  <div class="anim-in anim-d1 slide-tagline">Chapter Six</div>
+  <h2 class="anim-in anim-d2 slide-title" style="font-size:clamp(1.6rem,3vw,2.4rem);">When Cache-Aware Routing Is Worth It</h2>
+  <p class="anim-in anim-d3 slide-subtitle">
+    An honest assessment. Cache-aware routing is not always the answer -- here is when it matters and when it does not.
+  </p>
+  <div class="verdict-grid anim-in anim-d4">
+    <div class="verdict-col verdict-col--yes">
+      <div class="verdict-col-title">Worth the investment when...</div>
+      <ul class="verdict-list">
+        <li>Your workload has high prefix overlap -- multi-turn chat, agentic workflows, RAG with shared templates</li>
+        <li>You are already running Kubernetes with KServe or planning to</li>
+        <li>Context lengths regularly exceed 4K tokens, where cache savings compound</li>
+        <li>You need consistent low-latency TTFT, not just good average throughput</li>
+        <li>You are scaling to multiple GPU pods and cache misses waste expensive compute</li>
+      </ul>
+    </div>
+    <div class="verdict-col verdict-col--no">
+      <div class="verdict-col-title">Probably not worth it when...</div>
+      <ul class="verdict-list">
+        <li>Your prompts are mostly unique with little prefix reuse -- batch processing, one-shot classification</li>
+        <li>You are running a single GPU pod -- local caching already handles everything</li>
+        <li>You do not use Kubernetes and do not plan to -- the Platform stack adds complexity</li>
+        <li>Context lengths are short (under 1K tokens) -- the prefill savings are minimal</li>
+        <li>Simplicity matters more than performance -- the Basic stack is genuinely simpler</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLIDE 8: CTA ===== -->
+<div class="slide" id="slide-7">
+<div class="slide-inner" style="text-align:center;">
+  <div class="anim-in anim-d1 slide-tagline">Get Started</div>
+  <h2 class="anim-in anim-d2 slide-title" style="max-width:800px;margin:0 auto 20px;">
+    Start Building with llm-d
+  </h2>
+  <p class="anim-in anim-d3 slide-subtitle" style="margin:0 auto 0;">
+    llm-d is an open-source CNCF Sandbox project. It runs on any Kubernetes cluster,
+    any GPU vendor (NVIDIA, AMD, Intel), and any vLLM-supported model.
+    The routing logic is decoupled from the infrastructure.
+  </p>
+  <div class="cta-links anim-in anim-d4" style="justify-content:center;">
+    <a href="https://github.com/llm-d/llm-d" target="_blank" rel="noopener" class="cta-btn cta-btn--primary">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+    <a href="https://www.cncf.io/projects/llm-d/" target="_blank" rel="noopener" class="cta-btn cta-btn--outline">
+      CNCF Project
+    </a>
+    <a href="https://llm-d.ai" target="_blank" rel="noopener" class="cta-btn cta-btn--outline">
+      llm-d.ai
+    </a>
+  </div>
+  <div class="footer-meta anim-in anim-d5">
+    <p>Performance data from llm-d benchmarks -- H200 GPUs, Llama 3.1 70B, vLLM runtime.</p>
+    <p>Author: <strong>Markell Rawls</strong> -- Developer Advocate, Red Hat</p>
+    <p>
+      <a href="https://github.com/llm-d">GitHub</a> &middot;
+      <a href="https://www.cncf.io/projects/llm-d/">CNCF</a> &middot;
+      <a href="https://llm-d.ai">Website</a> &middot;
+      <a href="https://cloud-native.slack.com/archives/llm-d">#llm-d on CNCF Slack</a>
     </p>
-    <div class="hero-stats reveal reveal-delay-3">
-      <div class="stat-card">
-        <div class="stat-value" data-count="3">0</div>
-        <div class="stat-label">Deployment Stacks</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" data-suffix="x" data-count="47.5">0</div>
-        <div class="stat-label">Max TTFT Speedup</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" data-prefix="" data-text="CNCF">CNCF</div>
-        <div class="stat-label">Sandbox Project</div>
-      </div>
-    </div>
   </div>
-</section>
+</div>
+</div>
 
-<div class="chapter-divider"><span class="divider-ornament"></span></div>
+</div><!-- /slides-track -->
+</div><!-- /slides-viewport -->
 
-<!-- ═══════════════════════════════════════════════════ CHAPTER 2: THE CONTENDERS ═══ -->
-<section class="approaches" id="chapter-contenders">
-  <div class="container">
-    <div class="chapter-marker reveal">
-      <span class="chapter-number">Chapter Two</span>
-      <span class="chapter-line"></span>
-    </div>
-    <h2 class="section-title reveal reveal-delay-1">The Contenders</h2>
-    <p class="section-description reveal reveal-delay-1">Every stack uses a runtime (vLLM or SGLang). The difference is in how requests are routed. Click a stack to highlight its column in the comparison matrix.</p>
-    <div class="approaches-grid" id="approachesGrid">
-      <!-- JS renders 3 stack cards -->
-    </div>
-  </div>
-</section>
+<!-- Navigation -->
+<div class="nav-arrows">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="nav-btn" id="nextBtn" aria-label="Next slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+</div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter"></div>
 
-<!-- Runtime Callout -->
-<section class="runtimes" id="runtimes">
-  <div class="container">
-    <div class="runtime-callout reveal">
-      <div class="runtime-callout-header">
-        <div class="runtime-callout-title">The Runtime Is an Orthogonal Choice</div>
-        <div class="runtime-callout-subtitle">All three stacks use vLLM or SGLang as the inference engine. Both provide local prefix caching per pod.</div>
-      </div>
-      <div class="runtime-cards" id="runtimeCards">
-        <!-- JS renders 2 runtime cards -->
-      </div>
-    </div>
-  </div>
-</section>
+<!-- ======================================================================
+     JAVASCRIPT
+     ====================================================================== -->
+<script>
+(function() {
+  'use strict';
 
-<!-- Architecture Comparison -->
-<section class="architecture" id="architecture">
-  <div class="container">
-    <h2 class="section-title reveal">Architecture Comparison</h2>
-    <p class="section-description reveal reveal-delay-1">Three stacks, side by side. Each adds a layer of intelligence on top of the one before it.</p>
-    <div class="arch-grid">
+  // ======== SLIDE NAVIGATION ========
+  var track = document.getElementById('slidesTrack');
+  var slides = document.querySelectorAll('.slide');
+  var totalSlides = slides.length;
+  var currentSlide = 0;
+  var isTransitioning = false;
 
-      <!-- Basic Stack -->
-      <div class="arch-column arch-column--rr reveal reveal-delay-1">
-        <div class="arch-label arch-label--rr">Basic Stack</div>
-        <div class="arch-stack">
-          <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
-          <div class="arch-connector"></div>
-          <div class="arch-node arch-node--rr" title="Distributes requests evenly across pods -- no awareness of cache state">Round-Robin LB</div>
-          <div class="arch-connector"></div>
-          <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Each pod has local prefix caching, but routing is random">vLLM Pod 1</div>
-            <div class="arch-node arch-node--pod">vLLM Pod 2</div>
-            <div class="arch-node arch-node--pod">vLLM Pod 3</div>
-          </div>
-        </div>
-        <div class="arch-column-summary">Hover to see request flow</div>
-      </div>
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var dotsContainer = document.getElementById('navDots');
+  var progressBar = document.getElementById('progressBar');
+  var counter = document.getElementById('slideCounter');
 
-      <!-- Platform Stack -->
-      <div class="arch-column arch-column--kserve reveal reveal-delay-2">
-        <div class="arch-label arch-label--kserve">Platform Stack</div>
-        <div class="arch-stack">
-          <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
-          <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API -- standardized traffic management, TLS, and routing rules">Gateway API</div>
-          <div class="arch-connector"></div>
-          <div class="arch-node arch-node--kserve" title="KServe InferenceService -- autoscaling, model lifecycle management, traffic splitting">KServe Router</div>
-          <div class="arch-connector"></div>
-          <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Same runtime, better ops -- but routing is still load-balanced">vLLM Pod 1</div>
-            <div class="arch-node arch-node--pod">vLLM Pod 2</div>
-            <div class="arch-node arch-node--pod">vLLM Pod 3</div>
-          </div>
-        </div>
-        <div class="arch-column-summary">Hover to see request flow</div>
-      </div>
+  // Build dots
+  for (var i = 0; i < totalSlides; i++) {
+    var dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('data-slide', i);
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dotsContainer.appendChild(dot);
+  }
 
-      <!-- Cache-Aware Stack -->
-      <div class="arch-column arch-column--llmd reveal reveal-delay-3">
-        <div class="arch-label arch-label--llmd">Cache-Aware Stack</div>
-        <div class="arch-stack">
-          <div class="arch-node arch-node--client" title="Incoming inference request from your application">Client Request</div>
-          <div class="arch-connector"></div>
-          <div class="arch-node arch-node--gateway" title="Kubernetes Gateway API -- same as Platform stack">Gateway API</div>
-          <div class="arch-connector"></div>
-          <div class="arch-node arch-node--llmd" title="llm-d Endpoint Picker Policy -- hashes the prefix, checks which pod has it cached, routes there">llm-d EPP</div>
-          <div class="arch-connector"></div>
-          <div class="arch-pods">
-            <div class="arch-node arch-node--pod" title="Pod 1 has the warmest cache -- EPP routes matching requests here">vLLM Pod 1<br><span style="font-size:9px;opacity:0.7">KV Cache ████</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 2 has a partial cache -- used for load balancing when Pod 1 is busy">vLLM Pod 2<br><span style="font-size:9px;opacity:0.7">KV Cache ██</span></div>
-            <div class="arch-node arch-node--pod" title="Pod 3 has minimal cache -- receives requests with new prefixes">vLLM Pod 3<br><span style="font-size:9px;opacity:0.7">KV Cache █</span></div>
-          </div>
-        </div>
-        <div class="arch-column-summary">Hover to see request flow</div>
-      </div>
+  function goToSlide(idx) {
+    if (idx < 0 || idx >= totalSlides || isTransitioning) return;
+    isTransitioning = true;
 
-    </div>
+    // Deactivate old slide
+    slides[currentSlide].classList.remove('active');
 
-    <!-- Compare These Two buttons -->
-    <div class="compare-buttons reveal reveal-delay-4">
-      <button class="compare-btn" data-compare="basic-platform">Compare Basic vs Platform</button>
-      <button class="compare-btn" data-compare="platform-cacheaware">Compare Platform vs Cache-Aware</button>
-      <button class="compare-btn" data-compare="basic-cacheaware">Compare Basic vs Cache-Aware</button>
-    </div>
+    currentSlide = idx;
+    track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
 
-    <!-- Comparison panel container -->
-    <div class="comparison-panel" id="comparisonPanel"></div>
+    // Update dots
+    var dots = dotsContainer.querySelectorAll('.nav-dot');
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].classList.toggle('active', j === currentSlide);
+    }
 
-    <div class="arch-note reveal reveal-delay-4">
-      <strong>These stacks build on each other.</strong> The Cache-Aware stack uses KServe for deployment and vLLM/SGLang as the runtime -- it adds llm-d's Endpoint Picker Policy (EPP) for cache-aware request routing on top of production infrastructure.
-    </div>
+    // Update buttons
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === totalSlides - 1;
 
-  </div>
-</section>
+    // Update progress
+    progressBar.style.width = ((currentSlide / (totalSlides - 1)) * 100) + '%';
 
-<!-- Interactive Comparison Matrix -->
-<section class="comparison" id="comparison">
-  <div class="container">
-    <h2 class="section-title reveal">Interactive Comparison Matrix</h2>
-    <p class="section-description reveal reveal-delay-1">Expand categories, hover columns, and compare the three stacks at a glance.</p>
-    <div class="matrix-wrapper reveal reveal-delay-2">
-      <div class="matrix-scroll">
-        <div class="matrix-grid" id="matrixGrid">
-          <!-- JS renders matrix -->
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    // Update counter
+    counter.textContent = (currentSlide + 1) + ' / ' + totalSlides;
 
-<div class="chapter-divider"><span class="divider-ornament"></span></div>
+    // Activate new slide after transition
+    setTimeout(function() {
+      slides[currentSlide].classList.add('active');
+      isTransitioning = false;
+      onSlideEnter(currentSlide);
+    }, 100);
+  }
 
-<!-- ═══════════════════════════════════════════════════ CHAPTER 3: YOUR DECISION ═══ -->
-<section class="performance" id="chapter-decision">
-  <div class="container">
-    <div class="chapter-marker reveal">
-      <span class="chapter-number">Chapter Three</span>
-      <span class="chapter-line"></span>
-    </div>
-    <h2 class="section-title reveal reveal-delay-1">Your Decision</h2>
-    <p class="section-description reveal reveal-delay-1">Time to First Token (TTFT) measured on H200 GPUs with Llama 3.1 70B. All stacks use vLLM -- the only difference is routing strategy.</p>
-    <div class="perf-chart-wrapper reveal reveal-delay-2">
-      <div class="perf-chart-container" id="perfChart">
-        <!-- JS renders SVG chart -->
-      </div>
-      <div class="perf-annotation" id="perfAnnotation">
-        <div class="perf-annotation-value">47.5x</div>
-        <div class="perf-annotation-label">faster TTFT at 32K tokens</div>
-      </div>
-      <div class="perf-tooltip" id="perfTooltip"></div>
-    </div>
-    <div class="perf-legend" id="perfLegend">
-      <!-- JS renders legend -->
-    </div>
-  </div>
-</section>
+  prevBtn.addEventListener('click', function() { goToSlide(currentSlide - 1); });
+  nextBtn.addEventListener('click', function() { goToSlide(currentSlide + 1); });
 
-<!-- Scenario Explorer -->
-<section class="scenarios" id="scenarios">
-  <div class="container">
-    <h2 class="section-title reveal">Scenario Explorer</h2>
-    <p class="section-description reveal reveal-delay-1">Different workloads favor different stacks. Explore which one wins -- and why -- for your use case.</p>
-    <div class="scenario-tabs reveal reveal-delay-2" id="scenarioTabs">
-      <!-- JS renders tabs -->
-    </div>
-    <div class="scenario-content reveal reveal-delay-3" id="scenarioContent">
-      <!-- JS renders scenario -->
-    </div>
-  </div>
-</section>
+  dotsContainer.addEventListener('click', function(e) {
+    var dot = e.target.closest('.nav-dot');
+    if (dot) goToSlide(parseInt(dot.getAttribute('data-slide')));
+  });
 
-<!-- Decision Guide -->
-<section class="decision" id="decision">
-  <div class="container">
-    <h2 class="section-title reveal">Which Stack Is Right for You?</h2>
-    <p class="section-description reveal reveal-delay-1">Answer a few questions about your workload and infrastructure to get a recommendation.</p>
-    <div class="decision-layout">
-      <div class="decision-questions reveal reveal-delay-2" id="decisionQuestions">
-        <!-- JS renders questions -->
-      </div>
-      <div class="decision-result reveal reveal-delay-3" id="decisionResult">
-        <!-- JS renders result -->
-      </div>
-    </div>
-  </div>
-</section>
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      goToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goToSlide(currentSlide - 1);
+    }
+  });
 
-<div class="chapter-divider"><span class="divider-ornament"></span></div>
+  // Click anywhere (except interactive elements) to advance
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.nav-btn, .nav-dot, .cta-btn, a, button')) return;
+    var rect = document.body.getBoundingClientRect();
+    var clickX = e.clientX / rect.width;
+    if (clickX > 0.65) goToSlide(currentSlide + 1);
+    else if (clickX < 0.35) goToSlide(currentSlide - 1);
+  });
 
-<!-- ═══════════════════════════════════════════════════ CHAPTER 4: THE VERDICT ═══ -->
-<section class="methodology" id="chapter-verdict">
-  <div class="container">
-    <div class="chapter-marker reveal">
-      <span class="chapter-number">Chapter Four</span>
-      <span class="chapter-line"></span>
-    </div>
-    <h2 class="section-title reveal reveal-delay-1">The Verdict</h2>
-    <p class="section-description reveal reveal-delay-1">How we characterized each deployment stack, where the data comes from, and an honest take on when cache-aware routing is worth it.</p>
+  // Initialize
+  goToSlide(0);
+  slides[0].classList.add('active');
 
-    <!-- Honest Assessment -->
-    <div class="verdict-assessment reveal reveal-delay-2">
-      <h3 class="verdict-assessment-title">When Cache-Aware Routing Is Worth It -- and When It Isn't</h3>
-      <div class="verdict-columns">
-        <div class="verdict-col verdict-col--worth">
-          <div class="verdict-col-heading">Worth the investment when...</div>
-          <ul class="verdict-list">
-            <li>Your workload has high prefix overlap -- multi-turn chat, agentic workflows, RAG with shared templates</li>
-            <li>You are already running Kubernetes with KServe or planning to</li>
-            <li>Context lengths regularly exceed 4K tokens, where cache savings compound</li>
-            <li>You need consistent low-latency TTFT, not just good average throughput</li>
-            <li>You are scaling to multiple GPU pods and cache misses are wasting expensive compute</li>
-          </ul>
-        </div>
-        <div class="verdict-col verdict-col--not">
-          <div class="verdict-col-heading">Probably not worth it when...</div>
-          <ul class="verdict-list">
-            <li>Your prompts are mostly unique with little prefix reuse -- batch processing, one-shot classification</li>
-            <li>You are running a single GPU pod -- local caching already handles everything</li>
-            <li>You do not use Kubernetes and do not plan to -- the Platform stack adds real complexity</li>
-            <li>Context lengths are short (under 1K tokens) -- the prefill savings are minimal</li>
-            <li>Simplicity matters more than performance -- the Basic stack is genuinely simpler to operate</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+  // ======== STAT COUNTER ANIMATION ========
+  function animateValue(el, end, duration, suffix) {
+    suffix = suffix || '';
+    var startTime = null;
+    var isFloat = end % 1 !== 0;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = end * eased;
+      el.textContent = (isFloat ? current.toFixed(1) : Math.round(current)) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
 
-    <!-- Methodology & Sources -->
-    <div class="method-grid reveal reveal-delay-3">
+  // ======== SCENARIO BAR ANIMATION ========
+  function animateScenarioBars() {
+    var bars = document.querySelectorAll('#slide-5 .scenario-bar-fill');
+    bars.forEach(function(bar) {
+      var w = bar.getAttribute('data-width');
+      bar.style.width = w;
+    });
+  }
 
-      <details class="method-item">
-        <summary>Benchmark Hardware &amp; Configuration</summary>
-        <div class="method-item-body">
-          <p>TTFT benchmarks were run on NVIDIA H200 GPUs with Llama 3.1 70B using vLLM as the runtime across all three stacks. Context lengths range from 500 to 32,768 tokens. The KV cache hit rate models 80--95% prefix reuse for multi-turn and RAG workloads, reflecting production patterns with shared system prompts.</p>
-        </div>
-      </details>
+  // ======== ON SLIDE ENTER ========
+  var slideInited = {};
+  function onSlideEnter(idx) {
+    if (slideInited[idx]) return;
+    slideInited[idx] = true;
 
-      <details class="method-item">
-        <summary>Stack-Based Comparison</summary>
-        <div class="method-item-body">
-          <p>This comparison evaluates three deployment stacks, not individual products. Every stack uses the same runtime (vLLM or SGLang) -- the difference is the routing and deployment layer. The Basic stack uses simple round-robin. The Platform stack adds KServe for Kubernetes-native operations. The Cache-Aware stack adds llm-d's EPP for KV-cache-aware routing.</p>
-        </div>
-      </details>
+    if (idx === 0) {
+      // Animate stat counters
+      var statEls = slides[0].querySelectorAll('.stat-value[data-count]');
+      statEls.forEach(function(el) {
+        var count = parseFloat(el.getAttribute('data-count'));
+        var suffix = el.getAttribute('data-suffix') || '';
+        setTimeout(function() { animateValue(el, count, 1200, suffix); }, 500);
+      });
+    }
 
-      <details class="method-item">
-        <summary>Cache Savings Estimates</summary>
-        <div class="method-item-body">
-          <p>Cache-aware savings come from routing requests to pods with warm KV caches. At 32K context with high prefix overlap, llm-d's EPP achieves up to 47.5x TTFT reduction vs round-robin. Savings vary by workload: multi-turn chat sees ~40x, RAG ~35x, agentic ~30x. Batch processing with unique prompts shows minimal cache benefit -- round-robin may actually be preferable.</p>
-        </div>
-      </details>
+    if (idx === 2) {
+      // Start routing canvas animation
+      setTimeout(startRoutingAnimation, 400);
+    }
 
-      <details class="method-item">
-        <summary>Data Sources &amp; Limitations</summary>
-        <div class="method-item-body">
-          <p>Data sources include llm-d project benchmarks, vLLM/SGLang documentation, KServe architecture docs, and CNCF project materials. Limitations: local prefix caching within a pod (provided by the runtime) is present in all three stacks -- the cache-aware advantage comes from cross-pod coordination. Real-world results depend on hardware, model size, prompt patterns, and cluster configuration.</p>
-        </div>
-      </details>
+    if (idx === 4) {
+      // Draw perf chart
+      setTimeout(drawPerfChart, 300);
+    }
 
-    </div>
-  </div>
-</section>
+    if (idx === 5) {
+      // Animate scenario bars
+      setTimeout(animateScenarioBars, 300);
+    }
+  }
 
-<!-- Footer -->
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-brand">llm-d -- CNCF Sandbox Project</div>
-    <div class="footer-links">
-      <a href="https://github.com/llm-d" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.cncf.io/projects/llm-d/" target="_blank" rel="noopener">CNCF</a>
-      <a href="https://llm-d.ai" target="_blank" rel="noopener">Website</a>
-    </div>
-    <p class="footer-note">Performance data based on llm-d benchmarks with H200 GPUs and Llama 3.1 70B. Results vary by hardware and workload.</p>
-  </div>
-</footer>
+  // ======== ROUTING FLOW CANVAS (Slide 3) ========
+  var routingAnimId = null;
+  function startRoutingAnimation() {
+    var canvas = document.getElementById('routingCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    var W = rect.width;
+    var H = rect.height;
 
-<script src="js/app.js"></script>
+    // Three columns
+    var colW = W / 3;
+    var colors = ['#c4573a', '#4a7fb5', '#2e7d52'];
+    var labels = ['Round-Robin', 'Load-Aware', 'Cache-Aware (llm-d)'];
+    var podY = H - 60;
+    var startY = 50;
+
+    // Pod positions per column
+    var pods = [
+      [colW * 0.2, colW * 0.5, colW * 0.8],
+      [colW * 1.2, colW * 1.5, colW * 1.8],
+      [colW * 2.2, colW * 2.5, colW * 2.8]
+    ];
+
+    // Cache state for column 3 (cache-aware)
+    var cacheState = [0.9, 0.4, 0.1]; // Pod 1 has warmest
+
+    // Particles
+    var particles = [];
+    var lastSpawn = 0;
+    var spawnInterval = 1200;
+
+    function spawnParticle(time) {
+      for (var c = 0; c < 3; c++) {
+        var targetPod;
+        if (c === 0) {
+          // Round-robin: rotate
+          targetPod = Math.floor((time / spawnInterval)) % 3;
+        } else if (c === 1) {
+          // Load-aware: random but biased toward least loaded
+          targetPod = Math.random() < 0.5 ? 0 : (Math.random() < 0.6 ? 1 : 2);
+        } else {
+          // Cache-aware: always go to pod with warmest cache
+          targetPod = 0;
+        }
+        particles.push({
+          col: c,
+          pod: targetPod,
+          x: colW * c + colW / 2,
+          y: startY,
+          targetX: pods[c][targetPod],
+          targetY: podY - 15,
+          progress: 0,
+          color: colors[c],
+          born: time
+        });
+      }
+    }
+
+    var startTime = 0;
+    function draw(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Column separators
+      ctx.strokeStyle = 'rgba(232,226,217,0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(colW, 20);
+      ctx.lineTo(colW, H - 20);
+      ctx.moveTo(colW * 2, 20);
+      ctx.lineTo(colW * 2, H - 20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Labels
+      ctx.font = '600 14px "Red Hat Display", sans-serif';
+      ctx.textAlign = 'center';
+      for (var c = 0; c < 3; c++) {
+        ctx.fillStyle = colors[c];
+        ctx.fillText(labels[c], colW * c + colW / 2, 30);
+      }
+
+      // Draw pods
+      for (var c2 = 0; c2 < 3; c2++) {
+        for (var p = 0; p < 3; p++) {
+          var px = pods[c2][p];
+          var pw = colW * 0.22;
+          var ph = 32;
+
+          // Pod background
+          ctx.fillStyle = c2 === 2
+            ? 'rgba(46,125,82,' + (0.05 + cacheState[p] * 0.15) + ')'
+            : 'rgba(181,121,58,0.06)';
+          ctx.strokeStyle = c2 === 2
+            ? 'rgba(46,125,82,' + (0.15 + cacheState[p] * 0.25) + ')'
+            : 'rgba(181,121,58,0.2)';
+          ctx.lineWidth = 1;
+
+          roundRect(ctx, px - pw / 2, podY - ph / 2, pw, ph, 6);
+          ctx.fill();
+          roundRect(ctx, px - pw / 2, podY - ph / 2, pw, ph, 6);
+          ctx.stroke();
+
+          // Pod label
+          ctx.fillStyle = c2 === 2 ? '#2e7d52' : '#b5793a';
+          ctx.font = '600 10px "Red Hat Text", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Pod ' + (p + 1), px, podY + 3);
+
+          // Cache bar for column 3
+          if (c2 === 2) {
+            var barW = pw - 8;
+            var barH = 4;
+            var barX = px - barW / 2;
+            var barY = podY + 10;
+            ctx.fillStyle = 'rgba(46,125,82,0.1)';
+            roundRect(ctx, barX, barY, barW, barH, 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(46,125,82,0.5)';
+            roundRect(ctx, barX, barY, barW * cacheState[p], barH, 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Draw source node
+      for (var c3 = 0; c3 < 3; c3++) {
+        var sx = colW * c3 + colW / 2;
+        ctx.fillStyle = 'rgba(90,88,80,0.06)';
+        ctx.strokeStyle = 'rgba(232,226,217,0.8)';
+        ctx.lineWidth = 1;
+        roundRect(ctx, sx - 40, startY - 14, 80, 28, 6);
+        ctx.fill();
+        roundRect(ctx, sx - 40, startY - 14, 80, 28, 6);
+        ctx.stroke();
+        ctx.fillStyle = '#5c5850';
+        ctx.font = '600 11px "Red Hat Text", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Request', sx, startY + 4);
+      }
+
+      // Spawn particles
+      if (elapsed - lastSpawn > spawnInterval) {
+        spawnParticle(elapsed);
+        lastSpawn = elapsed;
+      }
+
+      // Update and draw particles
+      for (var i = particles.length - 1; i >= 0; i--) {
+        var pt = particles[i];
+        pt.progress += 0.012;
+        if (pt.progress > 1) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        // Curved path
+        var t = pt.progress;
+        var ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        var midX = (pt.x + pt.targetX) / 2;
+        var midY = (pt.y + pt.targetY) / 2;
+        var cx1 = pt.x;
+        var cy1 = pt.y + (midY - pt.y) * 0.5;
+        var cx2 = pt.targetX;
+        var cy2 = pt.targetY - (pt.targetY - midY) * 0.3;
+
+        // Bezier
+        var bx = Math.pow(1 - ease, 3) * pt.x + 3 * Math.pow(1 - ease, 2) * ease * cx1 + 3 * (1 - ease) * ease * ease * cx2 + Math.pow(ease, 3) * pt.targetX;
+        var by = Math.pow(1 - ease, 3) * pt.y + 3 * Math.pow(1 - ease, 2) * ease * cy1 + 3 * (1 - ease) * ease * ease * cy2 + Math.pow(ease, 3) * pt.targetY;
+
+        // Trail
+        ctx.beginPath();
+        ctx.arc(bx, by, 4, 0, Math.PI * 2);
+        ctx.fillStyle = pt.color;
+        ctx.globalAlpha = 0.9 - t * 0.5;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(bx, by, 8, 0, Math.PI * 2);
+        ctx.fillStyle = pt.color;
+        ctx.globalAlpha = 0.15;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Cache hit / miss labels
+      ctx.font = '600 11px "Red Hat Text", sans-serif';
+      ctx.textAlign = 'center';
+
+      ctx.fillStyle = '#c4573a';
+      ctx.fillText('Random target -- cache miss likely', colW * 0.5, H - 14);
+      ctx.fillStyle = '#4a7fb5';
+      ctx.fillText('Least loaded -- still cache blind', colW * 1.5, H - 14);
+      ctx.fillStyle = '#2e7d52';
+      ctx.fillText('Warmest cache -- near-instant TTFT', colW * 2.5, H - 14);
+
+      routingAnimId = requestAnimationFrame(draw);
+    }
+
+    if (routingAnimId) cancelAnimationFrame(routingAnimId);
+    routingAnimId = requestAnimationFrame(draw);
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // ======== PERFORMANCE CHART CANVAS (Slide 5) ========
+  function drawPerfChart() {
+    var canvas = document.getElementById('perfCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    var W = rect.width;
+    var H = rect.height;
+
+    var pad = { top: 40, right: 50, bottom: 60, left: 80 };
+    var cW = W - pad.left - pad.right;
+    var cH = H - pad.top - pad.bottom;
+
+    var contexts = [500, 1000, 2000, 4000, 8000, 16000, 32000];
+    var basic =     [85, 170, 340, 680, 1350, 2700, 4000];
+    var cacheaware = [40, 50, 58, 64, 70, 78, 84];
+    var maxY = 4500;
+
+    function xScale(i) { return pad.left + (i / (contexts.length - 1)) * cW; }
+    function yScale(v) { return pad.top + (1 - v / maxY) * cH; }
+
+    // Grid
+    var gridVals = [0, 1000, 2000, 3000, 4000];
+    ctx.strokeStyle = 'rgba(232,226,217,0.5)';
+    ctx.lineWidth = 1;
+    ctx.font = '500 11px "Red Hat Text", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#8a8477';
+    gridVals.forEach(function(v) {
+      var y = yScale(v);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(W - pad.right, y);
+      ctx.stroke();
+      ctx.fillText(v + 'ms', pad.left - 10, y + 4);
+    });
+
+    // X labels
+    ctx.textAlign = 'center';
+    contexts.forEach(function(c, i) {
+      var x = xScale(i);
+      var label = c >= 1000 ? (c / 1000) + 'K' : c;
+      ctx.fillText(label, x, H - pad.bottom + 24);
+    });
+
+    // Axis labels
+    ctx.fillStyle = '#8a8477';
+    ctx.font = '500 12px "Red Hat Text", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Context Length (tokens)', W / 2, H - 10);
+    ctx.save();
+    ctx.translate(20, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Time to First Token (ms)', 0, 0);
+    ctx.restore();
+
+    // Animated line drawing
+    var animProgress = { val: 0 };
+    var animDuration = 1500;
+    var animStart = null;
+
+    function animateChart(timestamp) {
+      if (!animStart) animStart = timestamp;
+      var elapsed = timestamp - animStart;
+      animProgress.val = Math.min(elapsed / animDuration, 1);
+      var ease = 1 - Math.pow(1 - animProgress.val, 3);
+
+      // Clear chart area
+      ctx.clearRect(pad.left - 1, pad.top - 1, cW + 2, cH + 2);
+
+      // Redraw grid lines in chart area
+      ctx.strokeStyle = 'rgba(232,226,217,0.5)';
+      ctx.lineWidth = 1;
+      gridVals.forEach(function(v) {
+        var y = yScale(v);
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(W - pad.right, y);
+        ctx.stroke();
+      });
+
+      // Draw filled area under basic
+      var lastIdx = Math.floor(ease * (contexts.length - 1));
+      var frac = (ease * (contexts.length - 1)) - lastIdx;
+
+      // Basic / Platform line (they're the same)
+      ctx.beginPath();
+      ctx.strokeStyle = '#c4573a';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      for (var i = 0; i <= lastIdx && i < contexts.length; i++) {
+        var x = xScale(i);
+        var y = yScale(basic[i]);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      if (lastIdx < contexts.length - 1 && frac > 0) {
+        var nx = xScale(lastIdx) + (xScale(lastIdx + 1) - xScale(lastIdx)) * frac;
+        var ny = yScale(basic[lastIdx]) + (yScale(basic[lastIdx + 1]) - yScale(basic[lastIdx])) * frac;
+        ctx.lineTo(nx, ny);
+      }
+      ctx.stroke();
+
+      // Cache-aware line
+      ctx.beginPath();
+      ctx.strokeStyle = '#2e7d52';
+      ctx.lineWidth = 3.5;
+      for (var j = 0; j <= lastIdx && j < contexts.length; j++) {
+        var x2 = xScale(j);
+        var y2 = yScale(cacheaware[j]);
+        if (j === 0) ctx.moveTo(x2, y2);
+        else ctx.lineTo(x2, y2);
+      }
+      if (lastIdx < contexts.length - 1 && frac > 0) {
+        var nx2 = xScale(lastIdx) + (xScale(lastIdx + 1) - xScale(lastIdx)) * frac;
+        var ny2 = yScale(cacheaware[lastIdx]) + (yScale(cacheaware[lastIdx + 1]) - yScale(cacheaware[lastIdx])) * frac;
+        ctx.lineTo(nx2, ny2);
+      }
+      ctx.stroke();
+
+      // Draw dots at data points
+      if (animProgress.val > 0.3) {
+        var dotAlpha = Math.min((animProgress.val - 0.3) / 0.3, 1);
+        for (var k = 0; k <= lastIdx && k < contexts.length; k++) {
+          // Basic dot
+          ctx.beginPath();
+          ctx.arc(xScale(k), yScale(basic[k]), 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#c4573a';
+          ctx.globalAlpha = dotAlpha;
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Cache-aware dot
+          ctx.beginPath();
+          ctx.arc(xScale(k), yScale(cacheaware[k]), 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#2e7d52';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // Gap annotation arrow at rightmost drawn point
+      if (animProgress.val > 0.7) {
+        var annoAlpha = Math.min((animProgress.val - 0.7) / 0.3, 1);
+        var annoIdx = Math.min(lastIdx, contexts.length - 1);
+        var topY = yScale(basic[annoIdx]);
+        var botY = yScale(cacheaware[annoIdx]);
+        var annoX = xScale(annoIdx) + 20;
+
+        ctx.globalAlpha = annoAlpha;
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#2e7d52';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(annoX, topY + 5);
+        ctx.lineTo(annoX, botY - 5);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Arrow heads
+        ctx.beginPath();
+        ctx.moveTo(annoX - 4, topY + 10);
+        ctx.lineTo(annoX, topY + 4);
+        ctx.lineTo(annoX + 4, topY + 10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(annoX - 4, botY - 10);
+        ctx.lineTo(annoX, botY - 4);
+        ctx.lineTo(annoX + 4, botY - 10);
+        ctx.stroke();
+
+        ctx.globalAlpha = 1;
+      }
+
+      if (animProgress.val < 1) {
+        requestAnimationFrame(animateChart);
+      } else {
+        // Show annotation box
+        var annoBox = document.getElementById('perfAnnotation');
+        if (annoBox) annoBox.classList.add('visible');
+      }
+    }
+
+    requestAnimationFrame(animateChart);
+  }
+
+  // ======== HANDLE RESIZE ========
+  var resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      if (currentSlide === 2) {
+        slideInited[2] = false;
+        startRoutingAnimation();
+        slideInited[2] = true;
+      }
+      if (currentSlide === 4) {
+        slideInited[4] = false;
+        drawPerfChart();
+        slideInited[4] = true;
+      }
+    }, 250);
+  });
+
+})();
+</script>
 </body>
 </html>
