@@ -752,16 +752,16 @@
     gridValues.forEach(function (v) {
       var y = yScale(v);
       svg += '<line class="perf-gridline" x1="' + pad.left + '" y1="' + y + '" x2="' + (W - pad.right) + '" y2="' + y + '"/>';
-      svg += '<text x="' + (pad.left - 10) + '" y="' + (y + 4) + '" text-anchor="end" fill="#718096" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + v + 'ms</text>';
+      svg += '<text x="' + (pad.left - 10) + '" y="' + (y + 4) + '" text-anchor="end" fill="#64748b" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + v + 'ms</text>';
     });
 
     contexts.forEach(function (ctx, i) {
       var x = xScale(i);
-      svg += '<text x="' + x + '" y="' + (H - 15) + '" text-anchor="middle" fill="#718096" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + (ctx >= 1000 ? (ctx / 1000) + 'K' : ctx) + '</text>';
+      svg += '<text x="' + x + '" y="' + (H - 15) + '" text-anchor="middle" fill="#64748b" font-size="11" font-family="SFMono-Regular,Consolas,monospace">' + (ctx >= 1000 ? (ctx / 1000) + 'K' : ctx) + '</text>';
     });
 
-    svg += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" text-anchor="middle" fill="#718096" font-size="12" font-family="Red Hat Text,sans-serif">Context Length (tokens)</text>';
-    svg += '<text x="15" y="' + (H / 2) + '" text-anchor="middle" fill="#718096" font-size="12" font-family="Red Hat Text,sans-serif" transform="rotate(-90,15,' + (H / 2) + ')">Time to First Token (ms)</text>';
+    svg += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" text-anchor="middle" fill="#64748b" font-size="12" font-family="Red Hat Text,sans-serif">Context Length (tokens)</text>';
+    svg += '<text x="15" y="' + (H / 2) + '" text-anchor="middle" fill="#64748b" font-size="12" font-family="Red Hat Text,sans-serif" transform="rotate(-90,15,' + (H / 2) + ')">Time to First Token (ms)</text>';
 
     CONFIG.STACKS.forEach(function (stack) {
       var points = data.stacks[stack.key];
@@ -775,7 +775,7 @@
     CONFIG.STACKS.forEach(function (stack) {
       var points = data.stacks[stack.key];
       points.forEach(function (v, i) {
-        svg += '<circle cx="' + xScale(i).toFixed(1) + '" cy="' + yScale(v).toFixed(1) + '" r="4" fill="' + stack.color + '" stroke="#fff" stroke-width="2" data-tooltip="' + stack.name + ': ' + v + 'ms at ' + contexts[i] + ' tokens" style="cursor:pointer;opacity:0" class="perf-point">';
+        svg += '<circle cx="' + xScale(i).toFixed(1) + '" cy="' + yScale(v).toFixed(1) + '" r="4" fill="' + stack.color + '" stroke="#111827" stroke-width="2" data-tooltip="' + stack.name + ': ' + v + 'ms at ' + contexts[i] + ' tokens" style="cursor:pointer;opacity:0" class="perf-point">';
         svg += '<animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="1.5s" fill="freeze"/>';
         svg += '</circle>';
       });
@@ -926,21 +926,35 @@
       '</div>';
     }).join('');
 
-    container.innerHTML = '<div class="scenario-header">' +
+    var newHTML = '<div class="scenario-header">' +
       '<span class="scenario-icon">' + s.icon + '</span>' +
       '<div><h3>' + s.title + '</h3><p>' + s.description + '</p></div>' +
     '</div>' +
     '<div class="scenario-comparison">' + cardsHTML + '</div>' +
     '<div class="scenario-why">' + s.why + '</div>';
 
+    // Smooth fade transition when switching tabs
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(10px)';
+
     setTimeout(function () {
-      $$('.scenario-bar-fill', container).forEach(function (bar) {
-        var w = bar.style.width;
-        bar.style.width = '0%';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { bar.style.width = w; });
-        });
+      container.innerHTML = newHTML;
+      // Trigger reflow then transition back
+      requestAnimationFrame(function () {
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
       });
+
+      // Animate bars after content is inserted
+      setTimeout(function () {
+        $$('.scenario-bar-fill', container).forEach(function (bar) {
+          var w = bar.style.width;
+          bar.style.width = '0%';
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { bar.style.width = w; });
+          });
+        });
+      }, 50);
     }, 50);
   }
 
@@ -1095,9 +1109,118 @@
   }
 
   /* ══════════════════════════════════════════════════════════
+     PARTICLE CANVAS BACKGROUND
+     ══════════════════════════════════════════════════════════ */
+  function initParticleBackground() {
+    var canvas = document.createElement('canvas');
+    canvas.id = 'particleCanvas';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
+    document.body.insertBefore(canvas, document.body.firstChild);
+
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var PARTICLE_COUNT = 70;
+    var COLORS = [
+      { r: 56, g: 161, b: 105 },   // llm-d green #38a169
+      { r: 59, g: 130, b: 246 },    // accent blue #3b82f6
+      { r: 255, g: 255, b: 255 }    // white
+    ];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function createParticle() {
+      var colorIdx = Math.floor(Math.random() * COLORS.length);
+      var c = COLORS[colorIdx];
+      var opacity = colorIdx === 2 ? 0.15 + Math.random() * 0.15 : 0.2 + Math.random() * 0.2;
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 1 + Math.random() * 2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        color: c,
+        opacity: opacity
+      };
+    }
+
+    for (var i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(createParticle());
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw connection lines between nearby particles
+      for (var i = 0; i < particles.length; i++) {
+        for (var j = i + 1; j < particles.length; j++) {
+          var dx = particles[i].x - particles[j].x;
+          var dy = particles[i].y - particles[j].y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            var lineOpacity = 0.03 + (1 - dist / 150) * 0.05;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = 'rgba(56, 161, 105, ' + lineOpacity + ')';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw particles
+      for (var k = 0; k < particles.length; k++) {
+        var p = particles[k];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around edges
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (p.y > canvas.height + 10) p.y = -10;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + p.color.r + ',' + p.color.g + ',' + p.color.b + ',' + p.opacity + ')';
+        ctx.fill();
+      }
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     LOADING SKELETON / SHIMMER
+     ══════════════════════════════════════════════════════════ */
+  function initLoadingSkeleton() {
+    var overlay = document.createElement('div');
+    overlay.className = 'loading-skeleton';
+    document.body.appendChild(overlay);
+
+    setTimeout(function () {
+      document.body.classList.add('app-loaded');
+    }, 600);
+
+    setTimeout(function () {
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    }, 1200);
+  }
+
+  /* ══════════════════════════════════════════════════════════
      INIT
      ══════════════════════════════════════════════════════════ */
   function init() {
+    initLoadingSkeleton();
+    initParticleBackground();
     renderStackCards();
     renderRuntimeCallout();
     renderMatrix();

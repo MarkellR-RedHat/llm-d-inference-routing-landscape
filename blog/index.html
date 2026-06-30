@@ -7,51 +7,353 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 145'%3E%3Cg fill='%23ee0000'%3E%3Cpath d='M127.47 83.49c12.51 0 30.61-2.58 30.61-17.46a14 14 0 0 0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89 8.69 103.76.5 97.51.5 91.69.5 90 8 83.06 8c-6.68 0-11.64-5.6-17.89-5.6-6 0-9.91 4.09-12.93 12.5 0 0-8.41 23.72-9.49 27.16A6.43 6.43 0 0 0 42.53 44c0 9.22 36.3 39.45 84.94 39.45M160 72.07c1.73 8.19 1.73 9.05 1.73 10.13 0 14-15.74 21.77-36.43 21.77C78.54 104 37.58 76.6 37.58 58.49a18.45 18.45 0 0 1 1.51-7.33C22.27 52 .5 55 .5 74.22c0 31.48 74.59 70.28 133.65 70.28 45.28 0 56.7-20.48 56.7-36.65 0-12.72-11-27.16-30.83-35.78'/%3E%3C/g%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&family=Red+Hat+Text:wght@400;500;700&family=Red+Hat+Mono:wght@400;500&display=swap');
-  :root { --rh-red: #EE0000; --rh-red-dark: #CC0000; --rh-black: #151515; --rh-gray-dark: #3C3F42; --rh-gray-mid: #6A6E73; --rh-gray-light: #F5F5F5; --rh-blue: #0066CC; --code-bg: #1E1E2E; --code-text: #CDD6F4; }
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: #1e293b;
+    --accent: #3b82f6;
+    --accent-light: #60a5fa;
+    --rh-red: #EE0000;
+    --rh-red-dark: #CC0000;
+    --green: #38a169;
+    --code-bg: #0d1117;
+    --code-text: #CDD6F4;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Red Hat Text', sans-serif; color: var(--rh-black); line-height: 1.7; font-size: 15px; background: #F9F9F9; }
-  .container { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
-  .submission-header { background: linear-gradient(135deg, var(--rh-red-dark), var(--rh-red)); color: white; padding: 32px 40px; border-radius: 12px 12px 0 0; }
-  .submission-header h1 { font-family: 'Red Hat Display', sans-serif; font-weight: 900; font-size: 1.6em; margin-bottom: 4px; }
+  body {
+    font-family: 'Red Hat Text', sans-serif;
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    background: var(--bg);
+  }
+
+  /* Scroll progress bar */
+  #scrollProgress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #e53e3e, #2b6cb0, #38a169);
+    z-index: 9999;
+    transition: width 0.1s linear;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+
+  .submission-header {
+    background: linear-gradient(135deg, var(--rh-red-dark), var(--rh-red));
+    color: white;
+    padding: 32px 40px;
+    border-radius: 12px 12px 0 0;
+  }
+  .submission-header h1 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 900;
+    font-size: 1.6em;
+    margin-bottom: 4px;
+  }
   .submission-header .subtitle { opacity: 0.85; font-size: 0.95em; }
-  .meta-card { background: white; border: 1px solid #E0E0E0; border-top: none; border-radius: 0 0 12px 12px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .meta-row { display: flex; border-bottom: 1px solid #EFEFEF; }
+
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .meta-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s ease;
+  }
   .meta-row:last-child { border-bottom: none; }
-  .meta-label { flex: 0 0 220px; padding: 16px 20px; background: #FAFAFA; font-weight: 700; font-size: 0.88em; color: var(--rh-gray-dark); border-right: 1px solid #EFEFEF; }
-  .meta-value { flex: 1; padding: 16px 20px; }
-  .meta-value a { color: var(--rh-blue); text-decoration: none; }
-  .badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.82em; font-weight: 600; margin-right: 6px; }
-  .badge-green { background: #E6F9E6; color: #1A7A1A; }
-  .badge-blue { background: #E6F0FF; color: #004080; }
-  .badge-red { background: #FFE6E6; color: #CC0000; }
-  .article { background: white; border: 1px solid #E0E0E0; border-radius: 12px; padding: 48px 40px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .article h2 { font-family: 'Red Hat Display', sans-serif; font-weight: 800; font-size: 1.4em; color: var(--rh-black); margin: 2em 0 0.6em; padding-bottom: 8px; border-bottom: 3px solid var(--rh-red); }
+  .meta-row:hover { background: rgba(59, 130, 246, 0.04); }
+  .meta-label {
+    flex: 0 0 220px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    font-weight: 700;
+    font-size: 0.88em;
+    color: var(--text-secondary);
+    border-right: 1px solid var(--border);
+  }
+  .meta-value { flex: 1; padding: 16px 20px; color: var(--text); }
+  .meta-value a { color: var(--accent-light); text-decoration: none; transition: color 0.2s; }
+  .meta-value a:hover { color: #93bbfc; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .badge-green { background: rgba(56, 161, 105, 0.15); color: #68d391; }
+  .badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent-light); }
+  .badge-red { background: rgba(238, 0, 0, 0.15); color: #fc8181; }
+
+  .article {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  /* Anchor links on headings */
+  .article h2 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 800;
+    font-size: 1.4em;
+    color: var(--text);
+    margin: 2em 0 0.6em;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--rh-red);
+    position: relative;
+  }
   .article h2:first-child { margin-top: 0; }
-  .article h3 { font-family: 'Red Hat Display', sans-serif; font-weight: 700; font-size: 1.1em; margin: 1.5em 0 0.5em; }
-  .article p { margin: 0 0 1.2em; }
+  .article h2 .anchor-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 400;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.85em;
+  }
+  .article h2:hover .anchor-link { opacity: 1; }
+  .article h2 .anchor-link:hover { color: var(--accent-light); }
+
+  .article h3 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin: 1.5em 0 0.5em;
+    color: var(--text);
+  }
+  .article p { margin: 0 0 1.2em; color: var(--text); }
   .article ul, .article ol { margin: 0 0 1.2em 1.5em; }
-  .article li { margin-bottom: 0.4em; }
-  .article strong { color: var(--rh-black); }
-  .article code { font-family: 'Red Hat Mono', monospace; background: #F0F0F0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-  .article pre { background: var(--code-bg); color: var(--code-text); padding: 20px; border-radius: 8px; overflow-x: auto; margin: 1.2em 0; font-family: 'Red Hat Mono', monospace; font-size: 0.85em; line-height: 1.6; }
-  .article pre code { background: none; padding: 0; color: inherit; }
-  .callout { background: #FFF8E1; border-left: 4px solid #FFC107; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 1.5em 0; font-size: 0.92em; }
-  .callout-red { background: #FFF0F0; border-left-color: var(--rh-red); }
-  .stat-box { display: inline-block; background: #F0F4FF; border: 1px solid #D0DCFF; border-radius: 8px; padding: 12px 20px; margin: 4px; text-align: center; }
-  .stat-box .number { font-family: 'Red Hat Display', sans-serif; font-size: 1.8em; font-weight: 900; color: var(--rh-red); }
-  .stat-box .label { font-size: 0.78em; color: var(--rh-gray-mid); margin-top: 2px; }
-  .footer-note { text-align: center; color: var(--rh-gray-mid); font-size: 0.85em; padding: 16px 0 8px; }
+  .article li { margin-bottom: 0.4em; color: var(--text); }
+  .article strong { color: var(--text); }
+  .article a { color: var(--accent-light); text-decoration: none; transition: color 0.2s; }
+  .article a:hover { color: #93bbfc; }
+  .article code {
+    font-family: 'Red Hat Mono', monospace;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border: 1px solid var(--border);
+  }
+  .article pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.2em 0;
+    font-family: 'Red Hat Mono', monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+  }
+  .article pre code { background: none; padding: 0; color: inherit; border: none; }
+
+  .callout {
+    background: rgba(255, 193, 7, 0.08);
+    border-left: 4px solid #FFC107;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 1.5em 0;
+    font-size: 0.92em;
+    color: var(--text);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .callout:hover {
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.1);
+  }
+  .callout-red {
+    background: rgba(238, 0, 0, 0.06);
+    border-left-color: var(--rh-red);
+  }
+  .callout-red:hover {
+    box-shadow: 0 0 12px rgba(238, 0, 0, 0.1);
+  }
+
+  .stat-box {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin: 4px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  }
+  .stat-box .number {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 1.8em;
+    font-weight: 900;
+    color: var(--rh-red);
+  }
+  .stat-box .label {
+    font-size: 0.78em;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* TL;DR box */
+  .tldr-box {
+    background: #0f1a2e;
+    border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 0 0 2em;
+  }
+  .tldr-box h3 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 900;
+    font-size: 1em;
+    color: var(--green);
+    margin: 0 0 8px;
+    letter-spacing: 0.05em;
+  }
+  .tldr-box p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.93em;
+    line-height: 1.65;
+  }
+
+  /* Key Takeaway boxes */
+  .key-takeaway {
+    background: #0f1a2e;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 1.5em 0;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .key-takeaway:hover {
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.1);
+  }
+  .key-takeaway .kt-label {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 700;
+    font-size: 0.72em;
+    color: var(--accent-light);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .key-takeaway p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.93em;
+    line-height: 1.65;
+  }
+
+  /* Further Reading card */
+  .further-reading {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 36px;
+    margin: 2em 0 0;
+  }
+  .further-reading h3 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 800;
+    font-size: 1.2em;
+    color: var(--text);
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .further-reading ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .further-reading li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    transition: transform 0.2s ease, background 0.2s ease;
+    padding-left: 8px;
+    border-radius: 4px;
+  }
+  .further-reading li:last-child { border-bottom: none; }
+  .further-reading li:hover {
+    transform: translateX(4px);
+    background: rgba(59, 130, 246, 0.04);
+  }
+  .further-reading a {
+    color: var(--accent-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .further-reading a:hover { color: #93bbfc; }
+
+  .footer-note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85em;
+    padding: 16px 0 8px;
+  }
   .hub-link { text-align: center; padding: 24px 0; }
-  .hub-link a { font-family: 'Red Hat Display', sans-serif; font-size: 0.85rem; font-weight: 600; text-decoration: none; margin: 0 12px; }
-  @media (max-width: 700px) { .meta-row { flex-direction: column; } .meta-label { flex: none; border-right: none; border-bottom: 1px solid #EFEFEF; } .article { padding: 28px 20px; } .submission-header { padding: 24px 20px; } }
+  .hub-link a {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin: 0 12px;
+  }
+
+  /* Scroll-reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 700px) {
+    .meta-row { flex-direction: column; }
+    .meta-label { flex: none; border-right: none; border-bottom: 1px solid var(--border); }
+    .article { padding: 28px 20px; }
+    .submission-header { padding: 24px 20px; }
+    .further-reading { padding: 24px 20px; }
+  }
 </style>
 </head>
 <body>
+
+<div id="scrollProgress"></div>
+<canvas id="blogParticleCanvas"></canvas>
+
 <div class="container">
 
 <div class="submission-header">
   <h1>The Inference Routing Landscape: How to Choose</h1>
-  <div class="subtitle">Round-robin, load-aware, hash-based, or cache-aware  --  which routing approach fits your workload</div>
+  <div class="subtitle">Round-robin, load-aware, hash-based, or cache-aware -- which routing approach fits your workload</div>
 </div>
 
 <div class="meta-card">
@@ -63,13 +365,19 @@
 </div>
 
 <div class="article">
-<h2>The Routing Decision Nobody Talks About</h2>
 
-<p>Every enterprise deploying LLMs makes a routing decision  --  whether they realize it or not. A basic load balancer in front of vLLM replicas is a routing decision. A managed API gateway is a routing decision. Each one carries trade-offs in cost, latency, vendor lock-in, and operational flexibility that compound at scale.</p>
+<div class="tldr-box reveal">
+  <h3>TL;DR</h3>
+  <p>Every LLM deployment makes a routing decision. Round-robin wastes GPU by ignoring KV cache state. Load-aware helps with hotspots but still misses caches. Hash-based is rigid and breaks at scale. Cache-aware routing (llm-d) tracks actual KV state across pods, delivering up to 47.5x TTFT improvement while running on any Kubernetes cluster and any GPU vendor.</p>
+</div>
+
+<h2 id="the-routing-decision-nobody-talks-about">The Routing Decision Nobody Talks About <a class="anchor-link" href="#the-routing-decision-nobody-talks-about">#</a></h2>
+
+<p>Every enterprise deploying LLMs makes a routing decision -- whether they realize it or not. A basic load balancer in front of vLLM replicas is a routing decision. A managed API gateway is a routing decision. Each one carries trade-offs in cost, latency, vendor lock-in, and operational flexibility that compound at scale.</p>
 
 <p>This post maps the inference routing landscape: what approaches exist, where each one wins, and how to choose based on your workload.</p>
 
-<h2>The Routing Approaches</h2>
+<h2 id="the-routing-approaches" class="reveal">The Routing Approaches <a class="anchor-link" href="#the-routing-approaches">#</a></h2>
 
 <h3>Round-robin / random</h3>
 <p>The default. Requests are distributed evenly across replicas with no awareness of what each replica has cached or how busy it is.</p>
@@ -91,7 +399,7 @@
 <p>Hashes the prompt (or a prefix of it) and consistently maps it to the same replica.</p>
 <ul>
   <li><strong>Strengths:</strong> Deterministic cache affinity, no state tracking needed</li>
-  <li><strong>Weaknesses:</strong> Rigid. Doesn&rsquo;t handle variable-length prefixes, pod scaling, or cache eviction. Skewed hash distributions create hotspots.</li>
+  <li><strong>Weaknesses:</strong> Rigid. Doesn't handle variable-length prefixes, pod scaling, or cache eviction. Skewed hash distributions create hotspots.</li>
   <li><strong>Best for:</strong> Static workloads with predictable prompt patterns</li>
 </ul>
 
@@ -103,11 +411,16 @@
   <li><strong>Best for:</strong> Multi-turn conversations, agentic workflows, document Q&amp;A, any workload with prefix sharing</li>
 </ul>
 
-<h2>The Scoring Framework</h2>
+<div class="key-takeaway reveal">
+  <div class="kt-label">Key Takeaway</div>
+  <p>The gap between routing approaches widens dramatically as prefix length grows. At 32K tokens, cache-aware routing is 47.5x faster than round-robin -- the difference between 3.5 seconds and 84 milliseconds.</p>
+</div>
+
+<h2 id="the-scoring-framework" class="reveal">The Scoring Framework <a class="anchor-link" href="#the-scoring-framework">#</a></h2>
 
 <p>When evaluating routing approaches for enterprise deployment, we score across five dimensions:</p>
 
-<div style="margin:1.5em 0;">
+<div style="margin:1.5em 0;" class="reveal">
   <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Cost</div><div class="label">GPU utilization &amp; waste</div></div>
   <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Latency</div><div class="label">TTFT &amp; throughput</div></div>
   <div class="stat-box" style="min-width:140px;"><div class="number" style="font-size:1.2em;">Lock-in</div><div class="label">Vendor dependency</div></div>
@@ -116,33 +429,38 @@
 </div>
 
 <h3>Vendor lock-in: the hidden cost</h3>
-<p>Proprietary inference platforms often bundle routing with their serving stack. You get convenience today, but when you need to switch hardware vendors, change models, or move to a different cloud, you&rsquo;re rebuilding the routing layer from scratch.</p>
+<p>Proprietary inference platforms often bundle routing with their serving stack. You get convenience today, but when you need to switch hardware vendors, change models, or move to a different cloud, you're rebuilding the routing layer from scratch.</p>
 
 <p>llm-d runs on any Kubernetes cluster, any GPU vendor (NVIDIA, AMD, Intel), and any vLLM-supported model. The routing logic is decoupled from the infrastructure.</p>
 
 <h3>Hardware flexibility</h3>
-<p>As GPU generations evolve and new accelerators emerge (NVIDIA B200, AMD MI325X, Intel Gaudi 3), your routing layer shouldn&rsquo;t be tied to one vendor&rsquo;s SDK. llm-d uses standard Kubernetes primitives  --  pods, services, endpoints  --  that work across any hardware.</p>
+<p>As GPU generations evolve and new accelerators emerge (NVIDIA B200, AMD MI325X, Intel Gaudi 3), your routing layer shouldn't be tied to one vendor's SDK. llm-d uses standard Kubernetes primitives -- pods, services, endpoints -- that work across any hardware.</p>
 
-<h2>The Business View</h2>
+<h2 id="the-business-view" class="reveal">The Business View <a class="anchor-link" href="#the-business-view">#</a></h2>
 
 <p>For decision-makers who need the summary:</p>
 
-<div class="callout callout-red">
-  <strong>The question isn&rsquo;t &ldquo;which routing is fastest?&rdquo;</strong> It&rsquo;s &ldquo;which routing approach lets us scale without locking us in, works across GPU vendors, and has a community behind it?&rdquo; Speed is table stakes  --  llm-d delivers 47.5x TTFT improvement. The strategic advantage is what comes with it.
+<div class="callout callout-red reveal">
+  <strong>The question isn't "which routing is fastest?"</strong> It's "which routing approach lets us scale without locking us in, works across GPU vendors, and has a community behind it?" Speed is table stakes -- llm-d delivers 47.5x TTFT improvement. The strategic advantage is what comes with it.
 </div>
 
-<h2>How to Choose</h2>
+<div class="key-takeaway reveal">
+  <div class="kt-label">Key Takeaway</div>
+  <p>Vendor lock-in is the hidden cost of proprietary inference platforms. llm-d runs on any Kubernetes cluster, any GPU vendor, and any vLLM-supported model -- keeping your options open as hardware evolves.</p>
+</div>
+
+<h2 id="how-to-choose" class="reveal">How to Choose <a class="anchor-link" href="#how-to-choose">#</a></h2>
 
 <p>Use this decision tree:</p>
 
 <ol>
-  <li><strong>Are your prompts short and uniform?</strong> Round-robin is fine. Don&rsquo;t over-engineer.</li>
-  <li><strong>Do you have prefix sharing?</strong> (Multi-turn, agents, document Q&amp;A) &rarr; You need cache-aware routing.</li>
-  <li><strong>Are you on multiple GPU vendors?</strong> &rarr; Avoid vendor-specific routing. Use Kubernetes-native.</li>
-  <li><strong>Do you need multi-tenant isolation?</strong> &rarr; llm-d supports per-namespace routing policies on OpenShift.</li>
+  <li><strong>Are your prompts short and uniform?</strong> Round-robin is fine. Don't over-engineer.</li>
+  <li><strong>Do you have prefix sharing?</strong> (Multi-turn, agents, document Q&amp;A) --> You need cache-aware routing.</li>
+  <li><strong>Are you on multiple GPU vendors?</strong> --> Avoid vendor-specific routing. Use Kubernetes-native.</li>
+  <li><strong>Do you need multi-tenant isolation?</strong> --> llm-d supports per-namespace routing policies on OpenShift.</li>
 </ol>
 
-<h2>Try the Interactive Comparison</h2>
+<h2 id="try-the-interactive-comparison" class="reveal">Try the Interactive Comparison <a class="anchor-link" href="#try-the-interactive-comparison">#</a></h2>
 
 <p>The <a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/">Inference Routing Landscape</a> web app lets you compare approaches side by side, toggle between a technical and business view, and see how each scores across the five dimensions for your specific workload.</p>
 
@@ -150,15 +468,143 @@
   <li><strong>llm-d on GitHub:</strong> <a href="https://github.com/llm-d/llm-d">github.com/llm-d/llm-d</a></li>
   <li><strong>Community:</strong> <a href="https://cloud-native.slack.com/archives/llm-d">#llm-d on CNCF Slack</a></li>
 </ul>
+
+<div class="further-reading reveal">
+  <h3>Further Reading</h3>
+  <ul>
+    <li><a href="https://github.com/llm-d/llm-d">llm-d GitHub Repository</a></li>
+    <li><a href="https://www.cncf.io/projects/llm-d/">llm-d on CNCF</a></li>
+    <li><a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/">Interactive Routing Landscape Comparison</a></li>
+    <li><a href="https://docs.vllm.ai/">vLLM Documentation</a></li>
+    <li><a href="https://kserve.github.io/website/">KServe Documentation</a></li>
+    <li><a href="https://gateway-api.sigs.k8s.io/">Kubernetes Gateway API</a></li>
+  </ul>
+</div>
+
 </div>
 
 <div class="footer-note">Submitted by Markell Rawls &middot; Developer Advocate &middot; Red Hat</div>
 
 <div class="hub-link">
-  <a href="https://markellr-redhat.github.io/llm-d-content-hub/" style="color:#CC0000;">&larr; Back to llm-d Content Hub</a>
-  <a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/" style="color:#0066CC;">Open Interactive App &rarr;</a>
+  <a href="https://markellr-redhat.github.io/llm-d-content-hub/" style="color:#fc8181;"><-- Back to llm-d Content Hub</a>
+  <a href="https://markellr-redhat.github.io/llm-d-inference-routing-landscape/" style="color:var(--accent-light);">Open Interactive App --></a>
 </div>
 
 </div>
+
+<script>
+// Scroll progress bar
+(function() {
+  var bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    var percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = percent + '%';
+  });
+})();
+
+// Scroll-reveal with IntersectionObserver
+(function() {
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach(function(el) { observer.observe(el); });
+  } else {
+    reveals.forEach(function(el) { el.classList.add('visible'); });
+  }
+})();
+
+// Particle canvas background
+(function() {
+  var canvas = document.getElementById('blogParticleCanvas');
+  var ctx = canvas.getContext('2d');
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.zIndex = '-1';
+  canvas.style.pointerEvents = 'none';
+
+  var particles = [];
+  var particleCount = 45;
+  var colors = ['#38a169', '#3b82f6'];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function Particle() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = (Math.random() - 0.5) * 0.4;
+    this.radius = 1 + Math.random() * 1;
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+    this.opacity = 0.15 + Math.random() * 0.2;
+  }
+
+  for (var i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw connection lines
+    for (var i = 0; i < particles.length; i++) {
+      for (var j = i + 1; j < particles.length; j++) {
+        var dx = particles[i].x - particles[j].x;
+        var dy = particles[i].y - particles[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 160) {
+          var lineOpacity = 0.04 + (1 - dist / 160) * 0.02;
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(59, 130, 246, ' + lineOpacity + ')';
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    for (var k = 0; k < particles.length; k++) {
+      var p = particles[k];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Move
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // Wrap around edges
+      if (p.x < -10) p.x = canvas.width + 10;
+      if (p.x > canvas.width + 10) p.x = -10;
+      if (p.y < -10) p.y = canvas.height + 10;
+      if (p.y > canvas.height + 10) p.y = -10;
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
 </body>
 </html>
